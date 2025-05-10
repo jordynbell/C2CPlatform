@@ -1,0 +1,81 @@
+/* Website Branding colours:
+Primary: #03045e
+Secondary: #00b4d8
+Accent: #caf0f8
+*/
+
+:root {
+  --bs-primary: #03045e;
+  --bs-secondary: #00b4d8;
+  --bs-accent: #caf0f8;
+}
+
+body {
+  padding-top: 5rem;
+}
+
+.navbar-custom {
+  background: linear-gradient(90deg, var(--bs-primary), #0077b6, var(--bs-secondary)) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+  transition: all 0.3s ease !important;
+  position: relative;
+  top: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  background-color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 183, 216, 0.5) !important;
+}
+
+/* Apply the same hover effect to all buttons */
+.btn {
+  transition: all 0.3s ease;
+  position: relative;
+  top: 0;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.navbar-custom .nav-link {
+  color: var(--bs-accent) !important;
+}
+.navbar-custom .nav-link:hover {
+  color: var(--bs-secondary) !important;
+}
+
+.navbar-custom .dropdown-menu {
+    background-color: var(--bs-primary) !important;
+  }
+  
+  .navbar-custom .dropdown-item {
+    color: var(--bs-accent) !important;
+  }
+  
+  .navbar-custom .dropdown-item:hover,
+  .navbar-custom .dropdown-item:focus {
+    color: var(--bs-secondary) !important;
+  }
