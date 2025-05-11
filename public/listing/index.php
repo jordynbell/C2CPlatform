@@ -40,7 +40,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 echo "<td>" . htmlspecialchars($row['title']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['description']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-                echo "<td>R " . htmlspecialchars($row['price']) . "</td>";
+                echo "<td>R " . htmlspecialchars(number_format($row['price'],2)) . "</td>";
                 echo "<td><form action='../order/create.php' method='POST'><input type='hidden' name='product_id' value='" . htmlspecialchars($row['product_id']) . "'><button type='submit' class='btn btn-primary'>Order</button></form></td>";
                 echo "</tr>";
             }

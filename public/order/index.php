@@ -41,7 +41,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 <tr>
                     <td><?php echo $order['order_id']; ?></td>
                     <td><?php echo $order['order_date']; ?></td>
-                    <td><?php echo 'R ' . $order['price']; ?></td>
+                    <td><?php echo 'R ' . number_format($order['price'],2); ?></td>
                     <td><?php echo $order['status']; ?></td>
                     <td>
                         <a href="view.php?id=<?php echo $order['product_id']; ?>" class="btn btn-primary">View</a>

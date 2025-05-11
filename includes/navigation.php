@@ -3,14 +3,14 @@
 require_once __DIR__ . '/../lib/db.php';
 
 if (!isset($_SESSION)) {
-    session_start();
+  session_start();
 }
 
 if (!isset($basePath)) {
-    $isProduction = (getenv('AWS_ENVIRONMENT') !== false 
-                  || getenv('EB_ENVIRONMENT') !== false 
-                  || file_exists('/var/www/html'));
-    $basePath = $isProduction ? '' : '/C2CPlatform/public';
+  $isProduction = (getenv('AWS_ENVIRONMENT') !== false
+    || getenv('EB_ENVIRONMENT') !== false
+    || file_exists('/var/www/html'));
+  $basePath = $isProduction ? '' : '/C2CPlatform/public';
 }
 
 $current_path = $_SERVER['PHP_SELF'];
@@ -19,15 +19,15 @@ $public_paths = ['/about.php', '/C2CPlatform/public/about.php'];
 
 $is_public_page = false;
 foreach (array_merge($auth_paths, $public_paths) as $path) {
-    if (strpos($current_path, $path) !== false) {
-        $is_public_page = true;
-        break;
-    }
+  if (strpos($current_path, $path) !== false) {
+    $is_public_page = true;
+    break;
+  }
 }
 
 if (!isset($_SESSION["User_ID"]) && !$is_public_page) {
-    header("Location: {$basePath}/auth/login.php");
-    exit;
+  header("Location: {$basePath}/auth/login.php");
+  exit;
 }
 
 $user_id = isset($_SESSION["User_ID"]) ? $_SESSION["User_ID"] : null;
@@ -42,17 +42,14 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
     </button>
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="<?php echo $basePath; ?>/about.php">About</a>
-        </li>
-        
+
         <?php if (isset($_SESSION["User_ID"])): ?>
           <li class="nav-item">
             <a class="nav-link" href="<?php echo $basePath; ?>/index.php">Home</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="listingsDropdown"
-               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Listings
             </a>
             <ul class="dropdown-menu" aria-labelledby="listingsDropdown">
@@ -65,16 +62,18 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
           <li class="nav-item">
             <a class="nav-link" href="<?php echo $basePath; ?>/order/index.php">My Orders</a>
           </li>
-          
+
           <?php if ($role === 'Admin'): ?>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="adminDropdown"
-                 role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Admin
               </a>
               <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                 <li><a class="dropdown-item" href="<?php echo $basePath; ?>/manage/users.php">Manage Users</a></li>
-                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
                 <li class="dropdown-header">Reports</li>
                 <li><a class="dropdown-item" href="<?php echo $basePath; ?>/reports/listings.php">Listings Report</a></li>
                 <li><a class="dropdown-item" href="<?php echo $basePath; ?>/reports/sales.php">Sales Report</a></li>
@@ -83,8 +82,11 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
             </li>
           <?php endif; ?>
         <?php endif; ?>
+        <li class="nav-item">
+          <a class="nav-link" href="<?php echo $basePath; ?>/about.php">About</a>
+        </li>
       </ul>
-      
+
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <?php if (isset($_SESSION["User_ID"])): ?>
           <li class="nav-item">

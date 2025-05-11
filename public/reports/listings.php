@@ -68,7 +68,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 echo "<td>" . htmlspecialchars($row['title']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['description']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-                echo "<td>R " . htmlspecialchars($row['price']) . "</td>";
+                echo "<td>R " . htmlspecialchars(number_format($row['price'],2)) . "</td>";
                 echo "<td>" . htmlspecialchars($row['status']) . "</td>";
                 if ($row['status'] == 'Sold' || $row['status'] == 'Deleted') {
                     echo "<td></td>";
