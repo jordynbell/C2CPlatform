@@ -7,4 +7,4 @@ CREATE TABLE Address (
     postal_code VARCHAR(10),
     country VARCHAR(50) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES User(user_id)
-);
+)

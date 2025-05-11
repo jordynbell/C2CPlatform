@@ -11,7 +11,7 @@ $errorMessage = 'Invalid email or password. Please try again.';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $stmt = $conn->prepare("SELECT password FROM User WHERE email = ?");
+    $stmt = $conn->prepare("SELECT password FROM user WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();

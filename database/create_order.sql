@@ -7,4 +7,4 @@ CREATE TABLE `Order` (
   product_id INT NOT NULL,
   FOREIGN KEY (customer_id) REFERENCES User(user_id),
   FOREIGN KEY (product_id) REFERENCES Product(product_id)
-)
+);

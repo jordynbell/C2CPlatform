@@ -2,3 +2,5 @@
 node_modules
 tests
 *.log
+# ignore EB platform hooks
+config/.platform/

@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $conn->prepare("INSERT INTO User (name, surname, email, password, role) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO user (name, surname, email, password, role) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $name, $surname, $email, $hashed_password, $role);
 
         if ($stmt->execute()) {
@@ -134,7 +134,7 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 
     <script>
-        <?php if ($invalidInput): ?>
+        <?php if ($incorrectPassword): ?>
             document.addEventListener('DOMContentLoaded', function() {
                 var toastElement = document.getElementById('errorToast');
                 var toast = new bootstrap.Toast(toastElement, {
