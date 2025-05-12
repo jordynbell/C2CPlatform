@@ -81,46 +81,55 @@ require_once __DIR__ . '/../../includes/header.php';
 
 ?>
 
-<form action="" method="post" class="container mt-4 mb-5 d-flex flex-column align-items-center">
-    <h1>Make Payment</h1>
+<div class="container">
+    <form action="" method="post" class="container mt-4 mb-5 d-flex flex-column align-items-center">
+        <h1>Make Payment</h1>
 
-    <div class="mb-2">
-        <label for="Card Name"></label>
-        <input type="text" name="Card Name" id="cardName" placeholder="John Doe" class="form-control" required>
-    </div>
+        <div class="mb-2">
+            <label for="Card Name"></label>
+            <input type="text" name="Card Name" id="cardName" placeholder="John Doe" class="form-control" required>
+        </div>
 
-    <div class="mb-2">
-        <label for="Card Number"></label>
-        <input type="text" name="Card Number" id="cardNumber" placeholder="1234 5678 9012 3456" class="form-control"
-            required>
-    </div>
+        <div class="mb-2">
+            <label for="Card Number"></label>
+            <input type="text" name="Card Number" id="cardNumber" placeholder="1234 5678 9012 3456" class="form-control"
+                required>
+        </div>
 
-    <div class="mb-2">
-        <label for="Expiry Date"></label>
-        <input type="text" name="Expiry Date" id="expiryDate" placeholder="MM/YY" class="form-control" required>
-    </div>
+        <div class="mb-2">
+            <label for="Expiry Date"></label>
+            <input type="text" name="Expiry Date" id="expiryDate" placeholder="MM/YY" class="form-control" required>
+        </div>
 
-    <div class="mb-2">
-        <label for="CVV"></label>
-        <input type="text" name="CVV" id="cvv" placeholder="123" class="form-control" required>
-    </div>
+        <div class="mb-2">
+            <label for="CVV"></label>
+            <input type="text" name="CVV" id="cvv" placeholder="123" class="form-control" required>
+        </div>
 
-    <div class="mb-2">
-        <label for="price">Total:</label>
-        <input type="text" name="price" id="price" value="<?php echo "R " . number_format($amount) ?>" class="form-control" readonly><br>
-    </div>
+        <div class="mb-2">
+            <label for="price">Total:</label>
+            <input type="text" name="price" id="price" value="<?php echo "R " . number_format($amount) ?>" class="form-control" readonly><br>
+        </div>
 
-    <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
-    <input type="hidden" name="price" value="<?php echo $amount; ?>">
-    <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
-    <input type="hidden" name="action" value="confirm">
+        <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
+        <input type="hidden" name="price" value="<?php echo $amount; ?>">
+        <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
+        <input type="hidden" name="action" value="confirm">
 
-    <div class="mb-2">
-        <input type="submit" value="Confirm Payment" class="btn btn-primary">
-    </div>
+        <div class="mb-2">
+            <input type="submit" value="Confirm Payment" class="btn btn-primary">
+        </div>
 
-</form>
+    </form>
+</div>
 
+
+<script>
+    const cardNumberInput = document.getElementById('cardNumber');
+    const expiryDateInput = document.getElementById('expiryDate');
+    const cvvInput = document.getElementById('cvv');
+    const cardNameInput = document.getElementById('cardName');
+</script>
 <?php
 require_once __DIR__ . '/../../includes/footer.php';
 ?>
