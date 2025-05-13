@@ -70,11 +70,19 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 <?php if ($status == 'Pending payment') : ?>
-<div class="text-center mt-4">
-<a href="../payment/create.php?product_id=<?= $product['product_id'] ?>" class="btn btn-success">Make Payment</a>
-</div>
-<?php endif; ?>
-<div class="text-center mt-4">
-    <a href="index.php" class="btn btn-primary">Back to My Orders</a>
-</div>
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+    <div class="text-center mt-4">
+        <div class="text-center mt-4">
+            <div class="text-center mt-4">
+                <form action="../payment/create.php" method="post">
+                    <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
+                    <input type="hidden" name="order_id" value="<?= $_GET['order_id'] ?? 0 ?>">
+                    <input type="hidden" name="price" value="<?= $product['price'] ?>">
+                    <button type="submit" class="btn btn-success">Make Payment</button>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
+    <div class="text-center mt-4">
+        <a href="index.php" class="btn btn-primary">Back to My Orders</a>
+    </div>
+    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
