@@ -217,7 +217,7 @@ require_once __DIR__ . '/../../includes/header.php';
         .addEventListener('change', function () {
             const opt = this.options[this.selectedIndex];
             if (!this.value) {
-                // clear if “Select an address”
+
                 document.getElementById('address_line').value = '';
                 document.getElementById('city').value = '';
                 document.getElementById('province').value = '';
@@ -225,16 +225,14 @@ require_once __DIR__ . '/../../includes/header.php';
                 document.getElementById('postal_code').value = '';
                 return;
             }
-            // populate from data- attributes
+
             document.getElementById('address_line').value = opt.dataset.line;
             document.getElementById('city').value = opt.dataset.city;
             document.getElementById('province').value = opt.dataset.province;
             document.getElementById('country').value = opt.dataset.country;
             document.getElementById('postal_code').value = opt.dataset.postal;
         });
-</script>
 
-<script>
     document.addEventListener('DOMContentLoaded', function () {
         const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
         const deliveryAddressDiv = document.getElementById('deliveryAddress');
@@ -248,7 +246,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 }
             });
         });
-    });
+    }); 
 </script>
 
 <?php

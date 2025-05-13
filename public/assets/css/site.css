@@ -78,3 +78,13 @@ body {
   .navbar-custom .dropdown-item:focus {
     color: var(--bs-secondary) !important;
   }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--bs-accent);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }

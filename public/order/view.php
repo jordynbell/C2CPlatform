@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "View Order Details - Squito";
 $sellerId = null;
+$status = isset($_GET['status']) ? $_GET['status'] : null;
 
 $stmt = $conn->prepare('SELECT * FROM product where product_id = ? LIMIT 1');
 $stmt->bind_param('i', $_GET['id']);
@@ -68,8 +69,12 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 </div>
+<?php if ($status == 'Pending payment') : ?>
+<div class="text-center mt-4">
+<a href="../payment/create.php?product_id=<?= $product['product_id'] ?>" class="btn btn-success">Make Payment</a>
+</div>
+<?php endif; ?>
 <div class="text-center mt-4">
     <a href="index.php" class="btn btn-primary">Back to My Orders</a>
 </div>
-
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

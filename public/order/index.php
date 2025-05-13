@@ -44,7 +44,7 @@ require_once __DIR__ . '/../../includes/header.php';
                     <td><?php echo 'R ' . number_format($order['price'],2); ?></td>
                     <td><?php echo $order['status']; ?></td>
                     <td>
-                        <a href="view.php?id=<?php echo $order['product_id']; ?>" class="btn btn-primary">View</a>
+                        <a href="view.php?id=<?php echo $order['product_id']; ?>&status=<?php echo $order['status'] ?>" class="btn btn-primary">View</a>
                         <?php if ($order['status'] == 'Pending payment'): ?>
                             <a href="cancel.php?id=<?php echo $order['order_id']; ?>" class="btn btn-danger">Cancel</a>
                         <?php endif; ?>
