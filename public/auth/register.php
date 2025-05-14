@@ -84,12 +84,12 @@ require_once __DIR__ . '/../../includes/header.php';
                 <form action="" method="post">
                     <div class="mb-3 mt-2">
                         <label for="name">Name</label>
-                        <input type="text" name="name" id="name" class="form-control" required
+                        <input type="text" name="name" id="name" class="form-control auto-capitalise" required
                             value="<?php echo $name; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="surname">Surname</label>
-                        <input type="text" name="surname" id="surname" class="form-control" required
+                        <input type="text" name="surname" id="surname" class="form-control auto-capitalise" required
                             value="<?php echo $surname; ?>">
                     </div>
                     <div class="mb-3">

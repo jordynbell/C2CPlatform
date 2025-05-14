@@ -17,6 +17,14 @@ $order_id = isset($_POST['order_id']) ? $_POST['order_id'] : 0;
 $amount = isset($_POST['price']) ? $_POST['price'] : null;
 $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : null;
 
+if (!isset($_POST['order_id']) || !isset($_POST['product_id']) || !isset($_POST['price'])) {
+    // Log the error
+    error_log("Missing required payment parameters: " . json_encode($_POST));
+    // Redirect back with error
+    header("Location: ../index.php?error=missing_payment_parameters");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $payment_date = (new DateTime('now', new DateTimeZone('GMT+2')))->format('Y-m-d H:i:s');
@@ -96,7 +104,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
         <div class="mb-2">
             <label for="Card Name"></label>
-            <input type="text" name="Card Name" id="cardName" placeholder="John Doe" class="form-control" required>
+            <input type="text" name="Card Name" id="cardName" placeholder="John Doe" class="form-control auto-capitalise" required>
         </div>
 
         <div class="mb-2">
@@ -132,7 +140,9 @@ require_once __DIR__ . '/../../includes/header.php';
     </form>
 </div>
 
-
+<!-- Card Input validation
+     Did not add Luhn's algorithm for card number validation as it is unecessary for the prototype.
+-->
 <script>
     const cardNumberInput = document.getElementById('cardNumber');
     const expiryDateInput = document.getElementById('expiryDate');

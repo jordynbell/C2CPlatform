@@ -11,6 +11,22 @@ if (!isset($_SESSION["Email"])) {
     exit;
 }
 
+if (!isset($_GET['order_id']) && isset($_GET['id'])) {
+    $order_stmt = $conn->prepare('SELECT order_id FROM `order` WHERE product_id = ? AND status = "Pending payment" LIMIT 1');
+    $order_stmt->bind_param('i', $_GET['id']);
+    $order_stmt->execute();
+    $order_result = $order_stmt->get_result();
+    if ($order_result->num_rows > 0) {
+        $order_data = $order_result->fetch_assoc();
+        $order_id = $order_data['order_id'];
+    } else {
+        $order_id = 0;
+    }
+    $order_stmt->close();
+} else {
+    $order_id = $_GET['order_id'] ?? 0;
+}
+
 $pageTitle = "View Order Details - Squito";
 $sellerId = null;
 $status = isset($_GET['status']) ? $_GET['status'] : null;
@@ -54,7 +70,8 @@ require_once __DIR__ . '/../../includes/header.php';
                             <b>Description:</b> <?= htmlspecialchars($product['description']) ?>
                         </div>
                         <div class="col-md-6">
-                            <b>Seller:</b> <?= htmlspecialchars($seller['name']) . " " . htmlspecialchars($seller['surname']) ?>
+                            <b>Seller:</b>
+                            <?= htmlspecialchars($seller['name']) . " " . htmlspecialchars($seller['surname']) ?>
                         </div>
                     </div>
                     <div class="row mt-4">
@@ -69,13 +86,13 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 </div>
-<?php if ($status == 'Pending payment') : ?>
+<?php if ($status == 'Pending payment'): ?>
     <div class="text-center mt-4">
         <div class="text-center mt-4">
             <div class="text-center mt-4">
                 <form action="../payment/create.php" method="post">
                     <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
-                    <input type="hidden" name="order_id" value="<?= $_GET['order_id'] ?? 0 ?>">
+                    <input type="hidden" name="order_id" value="<?= $order_id ?>">
                     <input type="hidden" name="price" value="<?= $product['price'] ?>">
                     <button type="submit" class="btn btn-success">Make Payment</button>
                 </form>

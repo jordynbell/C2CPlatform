@@ -45,7 +45,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
                     <div class="mb-3">
                         <label for="title">Title</label>
-                        <input type="text" name="title" id="title" class="form-control" required>
+                        <input type="text" name="title" id="title" class="form-control auto-capitalise" required>
                     </div>
 
                     <div class="mb-3">

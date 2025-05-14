@@ -184,20 +184,23 @@ require_once __DIR__ . '/../../includes/header.php';
                 <div class="row g-3">
                     <div class="col-12">
                         <label for="address_line" class="form-label">Address Line:</label>
-                        <input type="text" class="form-control" name="address_line" id="address_line"
+                        <input type="text" class="form-control auto-capitalise" name="address_line" id="address_line"
                             placeholder="123 Steyn Road, Grape Village">
                     </div>
                     <div class="col-md-6">
                         <label for="city" class="form-label">City:</label>
-                        <input type="text" class="form-control" name="city" id="city" placeholder="Cape Town">
+                        <input type="text" class="form-control auto-capitalise" name="city" id="city"
+                            placeholder="Cape Town">
                     </div>
                     <div class="col-md-6">
                         <label for="province" class="form-label">Province:</label>
-                        <input type="text" class="form-control" name="province" id="province" placeholder="Western Cape">
+                        <input type="text" class="form-control auto-capitalise" name="province" id="province"
+                            placeholder="Western Cape">
                     </div>
                     <div class="col-md-6">
                         <label for="country" class="form-label">Country:</label>
-                        <input type="text" class="form-control" name="country" id="country" placeholder="South Africa">
+                        <input type="text" class="form-control auto-capitalise" name="country" id="country"
+                            placeholder="South Africa">
                     </div>
                     <div class="col-md-6">
                         <label for="postal_code" class="form-label">Postal Code:</label>
@@ -236,17 +239,34 @@ require_once __DIR__ . '/../../includes/header.php';
     document.addEventListener('DOMContentLoaded', function () {
         const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
         const deliveryAddressDiv = document.getElementById('deliveryAddress');
+        const addressFields = [
+            document.getElementById('address_line'),
+            document.getElementById('city'),
+            document.getElementById('province'),
+            document.getElementById('country'),
+            document.getElementById('postal_code')
+        ];
+        const existingAddressSelect = document.getElementById('existing_address');
+
+        function updateFieldsRequired() {
+            const isDelivery = document.querySelector('input[name="delivery_method"]:checked').value === 'Delivery';
+            const hasExistingAddress = existingAddressSelect.value !== '';
+
+            deliveryAddressDiv.style.display = isDelivery ? 'block' : 'none';
+
+            addressFields.forEach(field => {
+                field.required = isDelivery && !hasExistingAddress;
+            });
+        }
+
+        updateFieldsRequired();
 
         deliveryMethodRadios.forEach(radio => {
-            radio.addEventListener('change', function () {
-                if (this.value === 'Delivery') {
-                    deliveryAddressDiv.style.display = 'block';
-                } else {
-                    deliveryAddressDiv.style.display = 'none';
-                }
-            });
+            radio.addEventListener('change', updateFieldsRequired);
         });
-    }); 
+
+        existingAddressSelect.addEventListener('change', updateFieldsRequired);
+    });
 </script>
 
 <?php

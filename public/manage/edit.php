@@ -61,11 +61,11 @@ require_once __DIR__ . '/../../includes/header.php';
 
                         <div class="mb-3">
                             <label for="name">Name</label>
-                            <input type="text" name="name" id="name" value="<?php echo $user_data["name"]; ?>" class="form-control" required> </br>
+                            <input type="text" name="name" id="name" value="<?php echo $user_data["name"]; ?>" class="form-control auto-capitalise" required> </br>
                         </div>
                         <div class="mb-3">
                             <label for="surname">Surname</label>
-                            <input type="text" name="surname" id="surname" value="<?php echo $user_data["surname"]; ?>" class="form-control" required> </br>
+                            <input type="text" name="surname" id="surname" value="<?php echo $user_data["surname"]; ?>" class="form-control auto-capitalise" required> </br>
                         </div>
                         <div class="mb-3">
                             <label for="email">Email</label>
@@ -73,7 +73,10 @@ require_once __DIR__ . '/../../includes/header.php';
                         </div>
                         <div class="mb-3">
                             <label for="role">Role</label>
-                            <input type="role" name="role" id="role" value="<?php echo $user_data["role"]; ?>" class="form-control" required> </br>
+                            <select name="role" id="role" class="form-control" required>
+                                <option value="Admin" <?php echo ($user_data["role"] == "Admin") ? "selected" : ""; ?>>Admin</option>
+                                <option value="Normal" <?php echo ($user_data["role"] == "Normal") ? "selected" : ""; ?>>Normal</option>
+                            </select>
                         </div>
                         <div class="mb-3 d-flex justify-content-center">
                             <button type="submit" name="saveEdit" class="btn btn-primary mt-2 mb-2" style="width: 30%;">Save</button>
