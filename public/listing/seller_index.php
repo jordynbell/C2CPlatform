@@ -13,28 +13,6 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "Seller Listings - Squito";
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $product_id = $_POST['product_id'];
-    $seller_id = $_SESSION['User_ID'];
-
-    if (isset(($_POST['action'])))
-    {
-        if ($_POST['action'] == 'delete')
-        {
-            $stmt = $conn->prepare('UPDATE product SET status = "Deleted" WHERE product_id = ? AND seller_id = ?');
-            $stmt->bind_param("ii", $product_id, $seller_id);
-            if (!$stmt->execute()) {
-                echo "Error: " / $stmt->error;
-            }
-        }
-        elseif ($_POST['action'] == 'edit')
-        {
-            header("Location: edit.php?id=" . $product_id);
-            exit;
-        }
-    }
-}
-
 require_once __DIR__ . '/../../includes/header.php';
 
 ?>
@@ -70,12 +48,12 @@ require_once __DIR__ . '/../../includes/header.php';
                     echo "<td></td>";
                 } else {
                     echo "<td>
-                        <form action='' method='POST' style='display:inline-block; margin-right:5px;'>
+                        <form action='delete.php' method='POST' style='display:inline-block; margin-right:5px;' id='deleteForm_" . $row['product_id'] . "'>
                             <input type='hidden' name='product_id' value='" . htmlspecialchars($row['product_id']) . "'>
                             <input type='hidden' name='action' value='delete'>
-                            <button type='submit' class='btn btn-danger'>Delete</button>
+                            <button type='button' class='btn btn-danger delete-btn' data-product-id='" . $row['product_id'] . "'>Delete</button>
                         </form>
-                        <form action='' method='POST' style='display:inline-block;'>
+                        <form action='edit.php' method='POST' style='display:inline-block;'>
                             <input type='hidden' name='product_id' value='" . htmlspecialchars($row['product_id']) . "'>
                             <input type='hidden' name='action' value='edit'>
                             <button type='submit' class='btn btn-primary'>Edit</button>
@@ -88,6 +66,47 @@ require_once __DIR__ . '/../../includes/header.php';
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm Deletion</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this listing?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
+        const confirmButton = document.getElementById('confirmDelete');
+        let currentFormId = null;
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                currentFormId = 'deleteForm_' + this.getAttribute('data-product-id');
+                modal.show();
+            });
+        });
+
+        confirmButton.addEventListener('click', function () {
+            if (currentFormId) {
+                document.getElementById(currentFormId).submit();
+                modal.hide();
+            }
+        });
+    });
+</script>
 
 <?php
 require_once __DIR__ . '/../../includes/footer.php';

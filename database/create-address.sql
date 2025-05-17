@@ -6,5 +6,6 @@ CREATE TABLE Address (
     province VARCHAR(50),
     postal_code VARCHAR(10),
     country VARCHAR(50) NOT NULL,
+    isActive BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (user_id) REFERENCES User(user_id)
 )

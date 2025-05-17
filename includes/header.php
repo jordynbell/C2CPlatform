@@ -1,4 +1,4 @@
-<?php 
+<?php
 if (!isset($_SESSION)) {
     session_start();
 }
@@ -16,11 +16,12 @@ if (!isset($_SESSION)) {
         integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
     <?php
 
-    $isProduction = (getenv('AWS_ENVIRONMENT') !== false 
-                || getenv('EB_ENVIRONMENT') !== false 
-                || file_exists('/var/www/html'));
+    $isProduction = (getenv('AWS_ENVIRONMENT') !== false
+        || getenv('EB_ENVIRONMENT') !== false
+        || file_exists('/var/www/html'));
     $basePath = $isProduction ? '' : '/C2CPlatform/public';
     ?>
+    <link rel="icon" href="<?php echo $basePath; ?>/assets/images/favicon.ico" type="image/x-icon">
     <link href="<?php echo $basePath; ?>/assets/css/site.css" rel="stylesheet">
 
 </head>

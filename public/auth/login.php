@@ -6,24 +6,33 @@ require_once __DIR__ . '/../../lib/db.php';
 
 $loginError = false;
 $email = '';
-$errorMessage = 'Invalid email or password. Please try again.';
+$errorMessage = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $stmt = $conn->prepare("SELECT password FROM user WHERE email = ?");
+    $stmt = $conn->prepare("SELECT password, isActive FROM user WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($db_password);
+        $stmt->bind_result($db_password, $isActive);
         $stmt->fetch();
         if (password_verify($password, $db_password)) {
 
+            if ($isActive != 1) {
+                $_SESSION['flash_error'] = 'account_inactive';
+                $_SESSION['form_data'] = [
+                    'email' => $email,
+                ];
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit;
+            }
+
             $_SESSION['Email'] = $email;
 
-            $stmt = $conn->prepare("SELECT user_id, role FROM user WHERE email = ? LIMIT 1");
+            $stmt = $conn->prepare("SELECT user_id, role, isActive FROM user WHERE email = ? AND isActive = 1");
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -54,8 +63,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 if (isset($_SESSION['flash_error'])) {
     $loginError = true;
-    // Use the same generic error message regardless of error type
-    $errorMessage = 'Invalid email or password. Please try again.';
+    if ($_SESSION['flash_error'] === 'account_inactive') {
+        $errorMessage = 'Your account is inactive. Please contact support for assistance.';
+    } else {
+        $errorMessage = 'Invalid email or password. Please try again.';
+    }
     unset($_SESSION['flash_error']);
 }
 
@@ -78,7 +90,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 <form action="" method="post">
                     <div class="mb-3 mt-2">
                         <label for="email">Email</label>
-                        <input type="email" name="email" id="email" class="form-control" required
+                        <input type="email" name="email" id="email" class="form-control" autocomplete="true" required
                             value="<?php echo $email; ?>">
                     </div>
                     <div class="mb-3">
@@ -115,7 +127,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <script>
     <?php if ($loginError): ?>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             var toastElement = document.getElementById('errorToast');
             var toast = new bootstrap.Toast(toastElement, {
                 autohide: true,

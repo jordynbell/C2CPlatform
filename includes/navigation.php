@@ -36,6 +36,7 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
 
 <nav class="navbar fixed-top navbar-expand-lg navbar-dark navbar-custom">
   <div class="container-fluid">
+
     <a class="navbar-brand" href="<?php echo $basePath; ?>/index.php">Squito</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
       <span class="navbar-toggler-icon"></span>
@@ -48,8 +49,8 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
             <a class="nav-link" href="<?php echo $basePath; ?>/index.php">Home</a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="listingsDropdown"
-              role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" href="#" id="listingsDropdown" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
               Listings
             </a>
             <ul class="dropdown-menu" aria-labelledby="listingsDropdown">
@@ -62,15 +63,26 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
           <li class="nav-item">
             <a class="nav-link" href="<?php echo $basePath; ?>/order/index.php">My Orders</a>
           </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="listingsDropdown" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Addresses
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="addressesDropdown">
+              <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/index.php">View Addresses</a></li>
+              <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/create.php">Create Addresses</a></li>
+              <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/edit.php">Edit Addresses</a></li>
+            </ul>
+          </li>
 
           <?php if ($role === 'Admin'): ?>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="adminDropdown"
-                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 Admin
               </a>
               <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                <li><a class="dropdown-item" href="<?php echo $basePath; ?>/manage/users.php">Manage Users</a></li>
+                <li><a class="dropdown-item" href="<?php echo $basePath; ?>/user/index.php">Manage Users</a></li>
                 <li>
                   <hr class="dropdown-divider">
                 </li>

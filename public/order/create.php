@@ -17,7 +17,7 @@ $user_id = $_SESSION['User_ID'];
 $product_data = null;
 $addresses = null;
 
-$address_stmt = $conn->prepare('SELECT * FROM address WHERE user_id = ?');
+$address_stmt = $conn->prepare('SELECT * FROM address WHERE user_id = ? AND isActive = 1');
 $address_stmt->bind_param("i", $user_id);
 $address_stmt->execute();
 $address_result = $address_stmt->get_result();
@@ -37,17 +37,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->close();
 
         if (isset($_POST['action']) && $_POST['action'] == 'confirm') {
+            $delivery_method = $_POST['delivery_method'];
             $address_id = null;
-            if (!empty($_POST['existing_address'])) {
-                $address_id = $_POST['existing_address'];
-            } else {
-                $new_address_stmt = $conn->prepare('INSERT INTO address (user_id, address_line, city, province, country, postal_code) VALUES (?, ?, ?, ?, ?, ?)');
-                $new_address_stmt->bind_param("issssi", $user_id, $_POST['address_line'], $_POST['city'], $_POST['province'], $_POST['country'], $_POST['postal_code']);
-                if ($new_address_stmt->execute()) {
-                    $address_id = $new_address_stmt->insert_id;
-                    $new_address_stmt->close();
+            if ($delivery_method == 'Delivery') {
+                if (!empty($_POST['existing_address'])) {
+                    $address_id = $_POST['existing_address'];
                 } else {
-                    echo "Failed to insert new address: " . $new_address_stmt->error;
+                    $new_address_stmt = $conn->prepare('INSERT INTO address (user_id, address_line, city, province, country, postal_code) VALUES (?, ?, ?, ?, ?, ?)');
+                    $new_address_stmt->bind_param("issssi", $user_id, $_POST['address_line'], $_POST['city'], $_POST['province'], $_POST['country'], $_POST['postal_code']);
+                    if ($new_address_stmt->execute()) {
+                        $address_id = $new_address_stmt->insert_id;
+                        $new_address_stmt->close();
+                    } else {
+                        echo "Failed to insert new address: " . $new_address_stmt->error;
+                    }
                 }
             }
 
@@ -216,27 +219,29 @@ require_once __DIR__ . '/../../includes/header.php';
 <?php endif; ?>
 
 <script>
-    document.getElementById('existing_address')
-        .addEventListener('change', function () {
-            const opt = this.options[this.selectedIndex];
-            if (!this.value) {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if existing_address element exists before adding event listener
+        const existingAddressSelect = document.getElementById('existing_address');
+        if (existingAddressSelect) {
+            existingAddressSelect.addEventListener('change', function () {
+                const opt = this.options[this.selectedIndex];
+                if (!this.value) {
+                    document.getElementById('address_line').value = '';
+                    document.getElementById('city').value = '';
+                    document.getElementById('province').value = '';
+                    document.getElementById('country').value = '';
+                    document.getElementById('postal_code').value = '';
+                    return;
+                }
 
-                document.getElementById('address_line').value = '';
-                document.getElementById('city').value = '';
-                document.getElementById('province').value = '';
-                document.getElementById('country').value = '';
-                document.getElementById('postal_code').value = '';
-                return;
-            }
+                document.getElementById('address_line').value = opt.dataset.line;
+                document.getElementById('city').value = opt.dataset.city;
+                document.getElementById('province').value = opt.dataset.province;
+                document.getElementById('country').value = opt.dataset.country;
+                document.getElementById('postal_code').value = opt.dataset.postal;
+            });
+        }
 
-            document.getElementById('address_line').value = opt.dataset.line;
-            document.getElementById('city').value = opt.dataset.city;
-            document.getElementById('province').value = opt.dataset.province;
-            document.getElementById('country').value = opt.dataset.country;
-            document.getElementById('postal_code').value = opt.dataset.postal;
-        });
-
-    document.addEventListener('DOMContentLoaded', function () {
         const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
         const deliveryAddressDiv = document.getElementById('deliveryAddress');
         const addressFields = [
@@ -246,16 +251,18 @@ require_once __DIR__ . '/../../includes/header.php';
             document.getElementById('country'),
             document.getElementById('postal_code')
         ];
-        const existingAddressSelect = document.getElementById('existing_address');
-
+        
         function updateFieldsRequired() {
             const isDelivery = document.querySelector('input[name="delivery_method"]:checked').value === 'Delivery';
-            const hasExistingAddress = existingAddressSelect.value !== '';
+            const existingAddressSelect = document.getElementById('existing_address');
+            const hasExistingAddress = existingAddressSelect && existingAddressSelect.value !== '';
 
             deliveryAddressDiv.style.display = isDelivery ? 'block' : 'none';
 
             addressFields.forEach(field => {
-                field.required = isDelivery && !hasExistingAddress;
+                if (field) {
+                    field.required = isDelivery && !hasExistingAddress;
+                }
             });
         }
 
@@ -265,7 +272,9 @@ require_once __DIR__ . '/../../includes/header.php';
             radio.addEventListener('change', updateFieldsRequired);
         });
 
-        existingAddressSelect.addEventListener('change', updateFieldsRequired);
+        if (existingAddressSelect) {
+            existingAddressSelect.addEventListener('change', updateFieldsRequired);
+        }
     });
 </script>
 

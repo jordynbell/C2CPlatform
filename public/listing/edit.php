@@ -13,11 +13,17 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "Edit Listing - Squito";
 
-$sql = "SELECT product_id, title FROM product WHERE seller_id = '{$_SESSION['User_ID']}' AND status = 'active'";
-$result = $conn->query($sql);
+$stmt = "SELECT product_id, title FROM product WHERE seller_id = '{$_SESSION['User_ID']}' AND status = 'active'";
+$result = $conn->query($stmt);
 
 // Initalise the product data variable before loading the form
 $product_data = null;
+
+if (isset($_POST['product_id']) && isset($_POST['action']) && $_POST['action'] == 'edit') {
+    // Redirect to the same page with GET parameter
+    header("Location: edit.php?id=" . $_POST['product_id']);
+    exit;
+}
 
 if (isset($_GET['id'])) {
     $product_id = $_GET['id'];
@@ -28,10 +34,13 @@ if (isset($_GET['id'])) {
 
     if ($product_result->num_rows > 0) {
         $product_data = $product_result->fetch_assoc();
+        $stmt->close();
     } else {
         echo "No product found or you do not have permission to edit this product.";
+        $stmt->close();
         exit;
     }
+    
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -94,10 +103,8 @@ require_once __DIR__ . '/../../includes/header.php';
             </div>
         </div>
     </div>
-</div>
-<?php if ($product_data): ?>
-    <div class="container mx-auto mt-5 mb-5" style="max-width: 60rem;">
-        <div class="row justify-content-center">
+    <?php if ($product_data): ?>
+        <div class="row justify-content-center mb-4 mt-4">
             <div class="col-md-6">
                 <div class="card shadow-sm border rounded p-4">
                     <form action="" method="post">
@@ -135,15 +142,60 @@ require_once __DIR__ . '/../../includes/header.php';
                             </select>
                         </div>
                         <div class="mb-3 d-flex justify-content-center">
-                            <input type="submit" value="Edit Listing" class="form-control btn btn-primary"
-                                style="width: 40%;">
+                            <button type="button" value="Edit Listing" class="form-control btn btn-primary"
+                                style="width: 40%;" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                Edit Listing</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+    <?php endif; ?>
+</div>
+
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm Edit</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to edit this listing?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmEdit">Confirm</button>
+            </div>
+        </div>
     </div>
-<?php endif; ?>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editForm = document.querySelector('form[action=""][method="post"]');
+        const editButton = document.querySelector('[data-bs-target="#staticBackdrop"]');
+        const confirmButton = document.getElementById('confirmEdit');
+        const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
+
+        editButton.removeAttribute('data-bs-toggle');
+        editButton.removeAttribute('data-bs-target');
+
+        editButton.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            if (editForm.reportValidity()) {
+                modal.show();
+            }
+        });
+
+        confirmButton.addEventListener('click', function () {
+            modal.hide();
+            editForm.submit();
+        });
+    });
+</script>
 
 <?php
 $conn->close();

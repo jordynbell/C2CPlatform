@@ -34,6 +34,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (isset($_POST['action']) && $_POST['action'] == 'confirm') {
+        $check_order_exists_stmt = $conn->prepare('SELECT * FROM `order` WHERE order_id = ?');
+        $check_order_exists_stmt->bind_param("i", $order_id);
+        $check_order_exists_stmt->execute();
+        $result = $check_order_exists_stmt->get_result();
+        if ($result->num_rows == 0) {
+            // Order does not exist
+            header("Location: ../order/index.php");
+            exit;
+        }
+
+        $check_paid_stmt = $conn->prepare('SELECT * FROM `order` WHERE order_id = ? AND status = "Paid"');
+        $check_paid_stmt->bind_param("i", $order_id);
+        $check_paid_stmt->execute();
+        $result = $check_paid_stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            // Order already paid
+            header("Location: ../order/index.php");
+            exit;
+        }
+
         $stmt = $conn->prepare('INSERT INTO payment (order_id, payment_date, amount) VALUES (?, ?, ?)');
         $stmt->bind_param("isi", $order_id, $payment_date, $amount);
 
@@ -52,10 +73,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($cancel_stmt->execute()) {
                     $cancel_stmt->close();
                 } else {
-                    echo "Failed to cancel order: " . $cancel_stmt->error;
+                    header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
+                    exit;
                 }
             } else {
-                echo "Failed to update order status: " . $update_stmt->error;
+                header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
+                exit;
             }
 
             $update_stmt = $conn->prepare('UPDATE product SET status = ? WHERE product_id = ?');
@@ -63,9 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $update_stmt->bind_param("si", $new_status, $product_id);
             if ($update_stmt->execute()) {
                 $update_stmt->close();
-                header("Location: ../index.php");
             } else {
-                echo "Failed to update product status: " . $update_stmt->error;
+                header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
+                exit;
             }
 
             $shipment_stmt = $conn->prepare('UPDATE shipment SET delivery_status = ?, shipment_date = ? where order_id = ?');
@@ -77,19 +100,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $shipment_stmt->close();
             } else {
                 echo "Failed to update shipment status: " . $shipment_stmt->error;
+                header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
+                exit;
+            }
+
+            $shipment_cleanup_stmt = $conn->prepare('UPDATE shipment s JOIN `order` o ON s.order_id = o.order_id SET s.delivery_status = ? WHERE o.product_id = ? AND s.order_id != ? AND s.delivery_status != "Cancelled"');
+            $cancel_status = 'Cancelled';
+            $shipment_cleanup_stmt->bind_param("sii", $cancel_status, $product_id, $order_id);
+
+            if ($shipment_cleanup_stmt->execute()) {
+                $shipment_cleanup_stmt->close();
+            } else {
+                error_log("Failed to cancel other shipments: " . $shipment_cleanup_stmt->error);
             }
 
             $sale_stmt = $conn->prepare('INSERT INTO sale (product_id, price, date_sold) VALUES (?, ?, ?)');
             $sale_stmt->bind_param("ids", $product_id, $amount, $payment_date);
             if ($sale_stmt->execute()) {
                 $sale_stmt->close();
+                header("Location: success.php?order_id=" . $order_id);
+                exit;
             } else {
-                echo "Failed to insert sale record: " . $sale_stmt->error;
+                header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
+                exit;
             }
 
-            header("Location: ../order/index.php");
         } else {
-            echo "Failed to process payment: " . $stmt->error;
+            header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
+            exit;
         }
     }
 }
@@ -99,33 +137,48 @@ require_once __DIR__ . '/../../includes/header.php';
 ?>
 
 <div class="container mt-4 mb-5 d-flex flex-column align-items-center" style="width: 30%;">
-    <form action="" method="post" class="bg-light p-4 shadow-sm rounded">
+    <form action="" method="post" class="bg-light p-4 shadow-sm rounded needs-validation" novalidate>
         <h1>Make Payment</h1>
 
         <div class="mb-2">
-            <label for="Card Name"></label>
-            <input type="text" name="Card Name" id="cardName" placeholder="John Doe" class="form-control auto-capitalise" required>
+            <label for="cardName" class="form-label">Cardholder Name</label>
+            <input type="text" name="Card Name" id="cardName" placeholder="John Doe"
+                class="form-control auto-capitalise" pattern="[a-zA-Z\s]+" minlength="2" maxlength="50" required>
+            <div class="invalid-feedback">
+                Please enter a valid name (min 2 characters).
+            </div>
         </div>
 
         <div class="mb-2">
-            <label for="Card Number"></label>
+            <label for="cardNumber" class="form-label">Card Number</label>
             <input type="text" name="Card Number" id="cardNumber" placeholder="1234 5678 9012 3456" class="form-control"
-                required>
+                pattern="\d{4}\s\d{4}\s\d{4}\s\d{4}" required>
+            <div class="invalid-feedback">
+                Please enter a valid 16-digit card number.
+            </div>
         </div>
 
         <div class="mb-2">
-            <label for="Expiry Date"></label>
-            <input type="text" name="Expiry Date" id="expiryDate" placeholder="MM/YY" class="form-control" required>
+            <label for="expiryDate" class="form-label">Expiry Date</label>
+            <input type="text" name="Expiry Date" id="expiryDate" placeholder="MM/YY" class="form-control"
+                pattern="(0[1-9]|1[0-2])\/([0-9]{2})" required>
+            <div class="invalid-feedback">
+                Please enter a valid expiry date (MM/YY).
+            </div>
         </div>
 
         <div class="mb-2">
-            <label for="CVV"></label>
-            <input type="text" name="CVV" id="cvv" placeholder="123" class="form-control" required>
+            <label for="cvv" class="form-label">CVV</label>
+            <input type="text" name="CVV" id="cvv" placeholder="123" class="form-control" pattern="\d{3}" required>
+            <div class="invalid-feedback">
+                Please enter a valid 3-digit CVV.
+            </div>
         </div>
 
         <div class="mb-2">
             <label for="price">Total:</label>
-            <input type="text" name="price" id="price" value="<?php echo "R " . number_format($amount,) ?>" class="form-control" readonly><br>
+            <input type="text" name="price" id="price" value="<?php echo "R " . number_format($amount, ) ?>"
+                class="form-control" readonly><br>
         </div>
 
         <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
@@ -136,54 +189,55 @@ require_once __DIR__ . '/../../includes/header.php';
         <div class="mb-2 text-center">
             <input type="submit" value="Confirm Payment" class="btn btn-primary">
         </div>
-
     </form>
 </div>
 
-<!-- Card Input validation
-     Did not add Luhn's algorithm for card number validation as it is unecessary for the prototype.
--->
 <script>
+    // Simple formatting code for card fields
     const cardNumberInput = document.getElementById('cardNumber');
     const expiryDateInput = document.getElementById('expiryDate');
     const cvvInput = document.getElementById('cvv');
-    const cardNameInput = document.getElementById('cardName');
 
-    cardNumberInput.addEventListener('input', function() {
+    cardNumberInput.addEventListener('input', function () {
         this.value = this.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
-    });
-    expiryDateInput.addEventListener('input', function() {
-        this.value = this.value.replace(/\D/g, '').replace(/(.{2})/, '$1/').trim();
-    });
-    cvvInput.addEventListener('input', function() {
-        this.value = this.value.replace(/\D/g, '');
-    });
-    cardNameInput.addEventListener('input', function() {
-        this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
-    });
-
-    cardNumberInput.addEventListener('input', function() {
         if (this.value.length > 19) {
             this.value = this.value.slice(0, 19);
         }
     });
-    expiryDateInput.addEventListener('input', function() {
+
+    expiryDateInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').replace(/(.{2})/, '$1/').trim();
         if (this.value.length > 5) {
             this.value = this.value.slice(0, 5);
         }
     });
-    cvvInput.addEventListener('input', function() {
+
+    cvvInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '');
         if (this.value.length > 3) {
             this.value = this.value.slice(0, 3);
         }
     });
-    cardNameInput.addEventListener('input', function() {
-        if (this.value.length > 50) {
-            this.value = this.value.slice(0, 50);
-        }
-    });
 
+    // Bootstrap's built-in form validation
+    (() => {
+        'use strict'
 
+        // Fetch all forms we want to apply validation to
+        const forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>
 <?php
 require_once __DIR__ . '/../../includes/footer.php';

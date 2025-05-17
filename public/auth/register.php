@@ -36,6 +36,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     } else {
+        $stmt = $conn->prepare("SELECT * FROM user WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->store_result();
+        if ($stmt->num_rows > 0) {
+            $_SESSION['flash_error'] = 'email_exists';
+            $_SESSION['form_data'] = [
+                'name' => $name,
+                'surname' => $surname,
+                'email' => $email
+            ];
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit;
+        }
+
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $conn->prepare("INSERT INTO user (name, surname, email, password, role) VALUES (?, ?, ?, ?, ?)");
@@ -57,6 +72,10 @@ if (isset($_SESSION['flash_error'])) {
         $errorMessage = "Password must be at least 8 characters long.";
     } else if ($_SESSION['flash_error'] === 'pwd_mismatch') {
         $errorMessage = "Passwords do not match.";
+    } else if ($_SESSION['flash_error'] === 'email_exists') {
+        $errorMessage = "Email already exists. Please use a different email.";
+    } else {
+        $errorMessage = "An unknown error occurred.";
     }
 
     unset($_SESSION['flash_error']);
@@ -84,24 +103,26 @@ require_once __DIR__ . '/../../includes/header.php';
                 <form action="" method="post">
                     <div class="mb-3 mt-2">
                         <label for="name">Name</label>
-                        <input type="text" name="name" id="name" class="form-control auto-capitalise" required
+                        <input type="text" name="name" id="name" class="form-control auto-capitalise" autocomplete="true" required
                             value="<?php echo $name; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="surname">Surname</label>
-                        <input type="text" name="surname" id="surname" class="form-control auto-capitalise" required
+                        <input type="text" name="surname" id="surname" class="form-control auto-capitalise" autocomplete="true" required
                             value="<?php echo $surname; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="email">Email</label>
-                        <input type="email" name="email" id="email" class="form-control" required
+                        <input type="email" name="email" id="email" class="form-control" autocomplete="true" required
                             value="<?php echo $email; ?>">
                         <small class="form-text text-muted">We'll never share your email with anyone else.</small>
                     </div>
                     <div class="mb-3">
                         <label for="password">Password</label>
-                        <input type="password" name="password" id="password" class="form-control" required
-                            autocomplete="off">
+                        <input type="password" name="password" id="password" class="form-control"
+                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                            title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+                            required autocomplete="off">
                         <small class="form-text text-muted">Password must be at least 8 characters long.</small>
                     </div>
                     <div class="mb-3">
@@ -121,11 +142,12 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 
     <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert"
-            aria-live="assertive" aria-atomic="true">
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
             <div class="toast-header">
                 <strong class="me-auto">Error</strong>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
             </div>
             <div class="toast-body">
                 <?php echo $errorMessage; ?>
@@ -134,8 +156,35 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const capitalizeInputs = document.querySelectorAll('.auto-capitalise');
+
+            capitalizeInputs.forEach(input => {
+                if (input.value.length > 0) {
+                    input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
+                }
+
+                input.addEventListener('input', function (e) {
+                    let value = e.target.value;
+                    if (value.length > 0) {
+                        e.target.value = value.charAt(0).toUpperCase() + value.slice(1);
+                    }
+                });
+
+                input.addEventListener('blur', function (e) {
+                    let value = e.target.value.trim();
+                    if (value.length > 0) {
+                        e.target.value = value.split(' ')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ');
+                    }
+                });
+            });
+        });
+
         <?php if ($incorrectPassword): ?>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 var toastElement = document.getElementById('errorToast');
                 var toast = new bootstrap.Toast(toastElement, {
                     autohide: true,
@@ -146,4 +195,6 @@ require_once __DIR__ . '/../../includes/header.php';
             });
         <?php endif; ?>
     </script>
-    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+    <?php
+    require_once __DIR__ . '/../../includes/footer.php';
+    ?>

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 if (!isset($_SESSION)) {
     session_start();
@@ -16,10 +16,10 @@ require_once __DIR__ . '/../includes/header.php';
 
 ?>
 
-    <h1>My First PHP Page</h1>
-    <?php
-        echo "Welcome to Squito!";
-    ?>
+<h1>My First PHP Page</h1>
+<?php
+echo "Welcome to Squito!";
+?>
 
 <?php
 require_once __DIR__ . '/../includes/footer.php';

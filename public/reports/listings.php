@@ -49,6 +49,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="table-responsive">
         <table class="table table-striped table-hover table-bordered" border="1">
             <tr>
+                <th>Product ID</th>
                 <th>Title</th>
                 <th>Description</th>
                 <th>Category</th>
@@ -65,6 +66,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>";
+                echo "<td>" . htmlspecialchars($row['product_id']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['title']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['description']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['category']) . "</td>";
