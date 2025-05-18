@@ -24,6 +24,17 @@ $address_result = $address_stmt->get_result();
 $addresses = $address_result->fetch_all(MYSQLI_ASSOC);
 $address_stmt->close();
 
+if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['product_id'])) {
+    $product_id = $_GET['product_id'];
+
+    $stmt = $conn->prepare('SELECT product_id, product.title, product.description, product.category, product.price, product.status, product.seller_id, user.name, user.surname FROM product INNER JOIN user ON product.seller_id = user.user_id WHERE product.product_id = ?');
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $product_data = $result->fetch_assoc();
+    $stmt->close();
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : null;
 
@@ -223,7 +234,7 @@ require_once __DIR__ . '/../../includes/header.php';
         // Check if existing_address element exists before adding event listener
         const existingAddressSelect = document.getElementById('existing_address');
         if (existingAddressSelect) {
-            existingAddressSelect.addEventListener('change', function () {
+            existingAddressSelect.addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
                 if (!this.value) {
                     document.getElementById('address_line').value = '';
@@ -251,7 +262,7 @@ require_once __DIR__ . '/../../includes/header.php';
             document.getElementById('country'),
             document.getElementById('postal_code')
         ];
-        
+
         function updateFieldsRequired() {
             const isDelivery = document.querySelector('input[name="delivery_method"]:checked').value === 'Delivery';
             const existingAddressSelect = document.getElementById('existing_address');

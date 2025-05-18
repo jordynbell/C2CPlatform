@@ -53,11 +53,7 @@ require_once __DIR__ . '/../../includes/header.php';
                             <input type='hidden' name='action' value='delete'>
                             <button type='button' class='btn btn-danger delete-btn' data-product-id='" . $row['product_id'] . "'>Delete</button>
                         </form>
-                        <form action='edit.php' method='POST' style='display:inline-block;'>
-                            <input type='hidden' name='product_id' value='" . htmlspecialchars($row['product_id']) . "'>
-                            <input type='hidden' name='action' value='edit'>
-                            <button type='submit' class='btn btn-primary'>Edit</button>
-                        </form>
+                        <a href='edit.php?id=" . htmlspecialchars($row['product_id']) . "' class='btn btn-primary'>Edit</a>
                     </td>";
                 }
                 echo "</tr>";
@@ -87,19 +83,19 @@ require_once __DIR__ . '/../../includes/header.php';
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
         const confirmButton = document.getElementById('confirmDelete');
         let currentFormId = null;
 
         document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', function() {
                 currentFormId = 'deleteForm_' + this.getAttribute('data-product-id');
                 modal.show();
             });
         });
 
-        confirmButton.addEventListener('click', function () {
+        confirmButton.addEventListener('click', function() {
             if (currentFormId) {
                 document.getElementById(currentFormId).submit();
                 modal.hide();

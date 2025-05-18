@@ -13,34 +13,30 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "Edit Listing - Squito";
 
-$stmt = "SELECT product_id, title FROM product WHERE seller_id = '{$_SESSION['User_ID']}' AND status = 'active'";
-$result = $conn->query($stmt);
-
 // Initalise the product data variable before loading the form
 $product_data = null;
 
-if (isset($_POST['product_id']) && isset($_POST['action']) && $_POST['action'] == 'edit') {
-    // Redirect to the same page with GET parameter
-    header("Location: edit.php?id=" . $_POST['product_id']);
+
+if (!isset($_GET['id'])) {
+    // If no ID provided, redirect to seller's listings
+    header("Location: seller_index.php");
     exit;
 }
 
-if (isset($_GET['id'])) {
-    $product_id = $_GET['id'];
-    $stmt = $conn->prepare("SELECT * from product where product_id = ? AND seller_id = ? AND status = 'active'");
-    $stmt->bind_param("ii", $product_id, $_SESSION['User_ID']);
-    $stmt->execute();
-    $product_result = $stmt->get_result();
+$product_id = $_GET['id'];
+$stmt = $conn->prepare("SELECT * from product where product_id = ? AND seller_id = ? AND status = 'active'");
+$stmt->bind_param("ii", $product_id, $_SESSION['User_ID']);
+$stmt->execute();
+$product_result = $stmt->get_result();
 
-    if ($product_result->num_rows > 0) {
-        $product_data = $product_result->fetch_assoc();
-        $stmt->close();
-    } else {
-        echo "No product found or you do not have permission to edit this product.";
-        $stmt->close();
-        exit;
-    }
-    
+if ($product_result->num_rows > 0) {
+    $product_data = $product_result->fetch_assoc();
+    $stmt->close();
+} else {
+    // Improve error handling
+    $_SESSION['error_message'] = "No product found or you do not have permission to edit this product.";
+    header("Location: seller_index.php");
+    exit;
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -72,37 +68,6 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <div class="container mx-auto mt-5 mb-5" style="max-width: 60rem;">
     <h1 class="text-center mb-4">Edit Listing</h1>
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border rounded p-4">
-                <form action="" method="get">
-                    <div class="form-group">
-                        <div class="mb-3">
-                            <label for="id">Product to edit</label>
-                            <select name="id" id="id" class="form-control" required>
-                                <option value="">Select a product</option>
-                                <?php
-
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        // Check if the product is already selected
-                                        $selected = (isset($_GET['id']) && $_GET['id'] == $row["product_id"]) ? "selected" : "";
-                                        echo "<option value='{$row["product_id"]}' $selected>{$row["title"]}</option>";
-                                    }
-                                }
-                                ?>
-                            </select>
-                        </div>
-
-                        <div class="mb-3 d-flex justify-content-center">
-                            <button type="submit" class="form-control btn btn-primary" style="width: 40%;">Load
-                                Product</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     <?php if ($product_data): ?>
         <div class="row justify-content-center mb-4 mt-4">
             <div class="col-md-6">

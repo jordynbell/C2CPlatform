@@ -56,7 +56,6 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
             <ul class="dropdown-menu" aria-labelledby="listingsDropdown">
               <li><a class="dropdown-item" href="<?php echo $basePath; ?>/listing/index.php">View Listings</a></li>
               <li><a class="dropdown-item" href="<?php echo $basePath; ?>/listing/create.php">Create Listing</a></li>
-              <li><a class="dropdown-item" href="<?php echo $basePath; ?>/listing/edit.php">Edit Listing</a></li>
               <li><a class="dropdown-item" href="<?php echo $basePath; ?>/listing/seller_index.php">My Listings</a></li>
             </ul>
           </li>
@@ -66,12 +65,11 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="listingsDropdown" role="button" data-bs-toggle="dropdown"
               aria-expanded="false">
-              Addresses
+              Address Book
             </a>
             <ul class="dropdown-menu" aria-labelledby="addressesDropdown">
               <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/index.php">View Addresses</a></li>
               <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/create.php">Create Addresses</a></li>
-              <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/edit.php">Edit Addresses</a></li>
             </ul>
           </li>
 
