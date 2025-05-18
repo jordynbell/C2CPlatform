@@ -15,7 +15,7 @@ if (!isset($basePath)) {
 
 $current_path = $_SERVER['PHP_SELF'];
 $auth_paths = ['/auth/login.php', '/auth/register.php', '/C2CPlatform/public/auth/login.php', '/C2CPlatform/public/auth/register.php'];
-$public_paths = ['/about.php', '/C2CPlatform/public/about.php'];
+$public_paths = ['/about.php', '/C2CPlatform/public/about.php', '/index.php', '/C2CPlatform/public/index.php'];
 
 $is_public_page = false;
 foreach (array_merge($auth_paths, $public_paths) as $path) {
@@ -44,10 +44,11 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
+
+        <li class="nav-item">
+          <a class="nav-link" href="<?php echo $basePath; ?>/index.php">Home</a>
+        </li>
         <?php if (isset($_SESSION["User_ID"])): ?>
-          <li class="nav-item">
-            <a class="nav-link" href="<?php echo $basePath; ?>/index.php">Home</a>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="listingsDropdown" role="button" data-bs-toggle="dropdown"
               aria-expanded="false">

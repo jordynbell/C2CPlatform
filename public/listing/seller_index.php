@@ -47,10 +47,10 @@ require_once __DIR__ . '/../../includes/header.php';
                                 class="btn btn-primary">View</a></td>
                     <?php else: ?>
                         <td>
-                            <a href="view.php?id=<?php echo htmlspecialchars($row['product_id']); ?>"
+                            <a href="view.php?id=<?php echo htmlspecialchars($row['product_id']); ?>&source=seller"
                                 class="btn btn-primary">View</a>
                             <a href="edit.php?id=<?php echo htmlspecialchars($row['product_id']); ?>"
-                                class="btn btn-warning">Edit</a>
+                                class="btn btn-warning text-white">Edit</a>
 
                             <form action="delete.php" method="POST" style="display:inline-block; margin-right:5px;"
                                 id="deleteForm_<?php echo $row['product_id']; ?>">

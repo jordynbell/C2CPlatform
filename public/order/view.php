@@ -49,40 +49,71 @@ $stmt->close();
 require_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="container my-4">
+<div class="container my-5">
+    <div class="row justify-content-center mb-3">
+        <div class="col-12 col-lg-10">
+            <a href="index.php" class="btn btn-outline-secondary">Back to Listings</a>
+        </div>
+    </div>
     <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6 col-xl-6 mx-auto">
-            <div class="card shadow-sm border-0 rounded overflow-hidden bg-light text-dark ">
-                <div class="card-header text-center bg-primary text-white">
-                    <h3 class="mb-0">Product Details</h3>
-                </div>
-                <div class="text-center mt-4">
-                    <img src='../listing/getImage.php?id=<?php echo htmlspecialchars($product['product_id']); ?>'
-                        alt='Product Image' class='img-thumbnail' style='width: 8rem; height: 8rem;'>
-                </div>
-                <div class="card-body">
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <b>Title:</b> <?= htmlspecialchars($product['title']) ?>
-                        </div>
-                        <div class="col-md-6">
-                            <b>Category:</b> <?= htmlspecialchars($product['category']) ?>
-                        </div>
+        <div class="col-12 col-lg-10">
+            <div class="card shadow border-0 rounded-3 overflow-hidden">
+
+                <div class="row g-0">
+                    <div class="col-md-5 bg-light d-flex align-items-center justify-content-center p-4">
+                        <img src='../listing/getImage.php?id=<?php echo htmlspecialchars($product['product_id']); ?>'
+                            alt='<?php echo htmlspecialchars($product['title']); ?>'
+                            class="img-fluid rounded-3" style="max-height: 300px; object-fit: contain;">
                     </div>
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <b>Description:</b> <?= htmlspecialchars($product['description']) ?>
+
+                    <div class="col-md-7">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h2 class="mb-0 fs-4"><?php echo htmlspecialchars($product['title']); ?></h2>
                         </div>
-                        <div class="col-md-6">
-                            <b>Seller:</b>
-                            <?= htmlspecialchars($seller['name']) . " " . htmlspecialchars($seller['surname']) ?>
-                        </div>
-                    </div>
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                        </div>
-                        <div class="col-md-6">
-                            <b>Price:</b> R <?= number_format($product['price'], 2) ?>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="badge bg-secondary px-3 py-2"><?php echo htmlspecialchars($product['category']); ?></span>
+                                    <span class="fs-3 fw-bold text-primary">R <?php echo number_format($product['price'], 2); ?></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h5 class="text-muted mb-2">Description</h5>
+                                    <p class="card-text"><?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
+                                </div>
+
+                                <div class="d-flex align-items-center mb-3">
+                                    <div>
+                                        <small class="text-muted">Seller</small>
+                                        <p class="mb-0 fw-semibold"><?php echo htmlspecialchars($seller['name']) . " " . htmlspecialchars($seller['surname']); ?></p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <small class="text-muted">Status</small>
+                                        <p class="mb-0 fw-semibold">
+                                            <span class="badge bg-<?php echo $product['status'] == 'Active' ? 'success' : 'danger'; ?>">
+                                                <?php echo htmlspecialchars($product['status']); ?>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <?php if ($status == 'Pending payment'): ?>
+                                <form action="../payment/create.php" method="post" class="mt-4">
+                                    <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
+                                    <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
+                                    <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
+                                    <div class="d-flex justify-content-center">
+                                        <button type="submit" class="btn btn-success w-50">Make Payment</button>
+                                    </div>
+                                </form>
+                            <?php elseif ($product['status'] == 'Active' && $product['seller_id'] != $_SESSION['User_ID']): ?>
+                                <a href="../order/create.php?product_id=<?php echo htmlspecialchars($product['product_id']); ?>"
+                                    class="btn btn-primary btn-lg w-100">Order Now</a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -90,20 +121,4 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 </div>
-<?php if ($status == 'Pending payment'): ?>
-    <div class="text-center mt-4">
-        <div class="text-center mt-4">
-            <div class="text-center mt-4">
-                <form action="../payment/create.php" method="post">
-                    <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
-                    <input type="hidden" name="order_id" value="<?= $order_id ?>">
-                    <input type="hidden" name="price" value="<?= $product['price'] ?>">
-                    <button type="submit" class="btn btn-success">Make Payment</button>
-                </form>
-            </div>
-        </div>
-    <?php endif; ?>
-    <div class="text-center mt-4">
-        <a href="index.php" class="btn btn-primary">Back to My Orders</a>
-    </div>
-    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

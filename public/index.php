@@ -1,13 +1,17 @@
+<!-- 
+What do add to landing page:
+1. Create a hero section with a background image and a welcome message.
+2. Second section can have the benefits of using Squito.
+3. Reviews section with user testimonials.
+4. FAQ using bootstrap accordion.
+5. Get started section prompting user to register.
+
+-->
+
 <?php
 
 if (!isset($_SESSION)) {
     session_start();
-}
-
-// Check if the user is logged in, if not then redirect to login page
-if (!isset($_SESSION["Email"])) {
-    header("Location: auth/login.php");
-    exit;
 }
 
 $pageTitle = "Home - Squito";
