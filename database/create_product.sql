@@ -6,5 +6,6 @@ CREATE TABLE Product (
     price float NOT NULL,
     seller_id INT NOT NULL,
     status varchar(15) NOT NULL,
+    image LONGBLOB NOT NULL,  
     FOREIGN KEY (seller_id) REFERENCES User(user_id)
 )

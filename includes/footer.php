@@ -4,4 +4,18 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </body>
 
+<nav class="navbar fixed-bottom navbar-expand-lg navbar-dark navbar-custom" style="padding-top: 12px; padding-bottom: 12px;">
+    <div class="container-fluid">
+        <a class="text-white text-decoration-none" href="<?php echo $basePath . "/index.php" ?>"><span id="spanYear">2025</span> Squito ©</a>
+        <a class="text-white text-decoration-none" href="<?php echo $basePath . "/privacy.php" ?>">Privacy Policy</a>
+    </div>
+</nav>
+
+<script>
+    $('#spanYear').html(new Date().getFullYear());
+</script>
+
+<style>
+    body { padding-bottom: 70px; }
+</style>
 </html>

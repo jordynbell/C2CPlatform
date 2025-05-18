@@ -37,29 +37,29 @@ require_once __DIR__ . '/../../includes/header.php';
             <th>Role</th>
             <th>Status</th>
             <th>Actions</th>
-
-            <?php
-            while ($row = $result->fetch_assoc()) {
-                echo "<tr>";
-                echo "<td>" . $row["user_id"] . "</td>";
-                echo "<td>" . $row["name"] . "</td>";
-                echo "<td>" . $row["surname"] . "</td>";
-                echo "<td>" . $row["email"] . "</td>";
-                echo "<td>" . $row["role"] . "</td>";
-                echo "<td>" . ($row["isActive"] ? "Active" : "Inactive") . "</td>";
-                echo "<td class='d-flex gap-2'>";
-                if ($user_id != $row["user_id"]) {
-                    echo "<form action='delete.php' method='POST' id='deleteForm_" . $row['user_id'] . "'><input type='hidden' name='user_id' value='" . htmlspecialchars($row['user_id']) . "'><button type='button' class='btn btn-danger delete-btn' data-user-id='" . $row['user_id'] . "'>Delete</button></form>";
-                } else {
-                    echo "<div style='width: 72px;'></div>";
-                }
-                echo "<form action='edit.php' method='POST'><input type='hidden' name='user_id' value='" . htmlspecialchars($row['user_id']) . "'><button type='submit' name='loadEdit' class='btn btn-primary'>Edit</button></form>";
-                echo "</td>";
-                echo "</tr>";
-            }
-            $stmt->close();
-            ?>
-
+            <?php foreach ($result as $index => $row): ?>
+                <tr>
+                    <td><?php echo $index + 1; ?></td>
+                    <td><?php echo htmlspecialchars($row['name']); ?></td>
+                    <td><?php echo htmlspecialchars($row['surname']); ?></td>
+                    <td><?php echo htmlspecialchars($row['email']); ?></td>
+                    <td><?php echo htmlspecialchars($row['role']); ?></td>
+                    <td><?php echo $row['isActive'] ? 'Active' : 'Inactive'; ?></td>
+                    <td class="d-flex gap-2">
+                        <form action="edit.php" method="POST">
+                            <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($row['user_id']); ?>">
+                            <button type="submit" name="loadEdit" class="btn btn-primary">Edit</button>
+                        </form>
+                        <?php if ($row['user_id'] != $_SESSION['User_ID']): ?>
+                            <form action="delete.php" method="POST" id="deleteForm_<?php echo $row['user_id']; ?>">
+                                <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($row['user_id']); ?>">
+                                <button type="button" class="btn btn-danger delete-btn"
+                                    data-user-id="<?php echo $row['user_id']; ?>">Delete</button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
         </table>
     </div>
 </div>
@@ -88,15 +88,15 @@ require_once __DIR__ . '/../../includes/header.php';
         const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
         const confirmButton = document.getElementById('confirmDelete');
         let currentFormId = null;
-        
+
         document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 currentFormId = 'deleteForm_' + this.getAttribute('data-user-id');
                 modal.show();
             });
         });
-        
-        confirmButton.addEventListener('click', function() {
+
+        confirmButton.addEventListener('click', function () {
             if (currentFormId) {
                 document.getElementById(currentFormId).submit();
                 modal.hide();

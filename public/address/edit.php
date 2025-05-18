@@ -141,6 +141,54 @@ require_once __DIR__ . '/../../includes/header.php';
     });
 </script>
 
+<script>
+    // Save form data as user types
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all form fields we want to save
+        const addressLineField = document.getElementById('address_line');
+        const cityField = document.getElementById('city');
+        const provinceField = document.getElementById('province');
+        const countryField = document.getElementById('country');
+        const postalCodeField = document.getElementById('postal_code')
+
+
+        // Function to save form data
+        function saveFormData() {
+            const formData = {
+                address_line: addressLineField.value,
+                city: cityField.value,
+                province: provinceField.value,
+                country: countryField.value,
+                postal_code: postalCodeField.value
+            };
+
+            localStorage.setItem('editAddressFormData', JSON.stringify(formData));
+        }
+
+        // Add input event listeners to all fields
+        addressLineField.addEventListener('input', saveFormData);
+        cityField.addEventListener('input', saveFormData);
+        provinceField.addEventListener('input', saveFormData);
+        countryField.addEventListener('input', saveFormData);
+        postalCodeField.addEventListener('input', saveFormData);
+
+        // Load saved form data if it exists
+        const savedData = JSON.parse(localStorage.getItem('editAddressFormData'));
+        if (savedData) {
+            addressLineField.value = savedData.address_line || '';
+            cityField.value = savedData.city || '';
+            provinceField.value = savedData.province || '';
+            countryField.value = savedData.country || '';
+            postalCodeField.value = savedData.postal_code || '';
+        }
+
+        // Clear saved data when form is submitted
+        document.querySelector('form').addEventListener('submit', function () {
+            localStorage.removeItem('editAddressFormData');
+        });
+    });
+</script>
+
 <?php
 require_once __DIR__ . '/../../includes/footer.php';
 ?>

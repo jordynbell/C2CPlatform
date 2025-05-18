@@ -11,21 +11,25 @@ if (!isset($_SESSION["Email"])) {
     exit;
 }
 
+if ($_SESSION['Role'] != 'Admin') {
+    header("Location: ../index.php");
+    exit;
+}
+
 $pageTitle = "Edit Listing - Squito";
 
-// Initalise the product data variable before loading the form
 $product_data = null;
 
 
 if (!isset($_GET['id'])) {
     // If no ID provided, redirect to seller's listings
-    header("Location: seller_index.php");
+    header("Location: listings.php");
     exit;
 }
 
 $product_id = $_GET['id'];
-$stmt = $conn->prepare("SELECT * from product where product_id = ? AND seller_id = ? AND status = 'active'");
-$stmt->bind_param("ii", $product_id, $_SESSION['User_ID']);
+$stmt = $conn->prepare("SELECT * from product where product_id = ? AND status = 'active'");
+$stmt->bind_param("i", $product_id);
 $stmt->execute();
 $product_result = $stmt->get_result();
 
@@ -35,7 +39,7 @@ if ($product_result->num_rows > 0) {
 } else {
     // Improve error handling
     $_SESSION['error_message'] = "No product found or you do not have permission to edit this product.";
-    header("Location: seller_index.php");
+    header("Location: listings.php");
     exit;
 }
 
@@ -53,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (!in_array($fileType, $allowedMimeTypes)) {
             $error = "Only JPG, JPEG and PNG images are allowed.";
-        } else if ($_FILES['image']['size'] > 2000000) { // 2MB limit
+        } else if ($_FILES['image']['size'] > 2000000) {
             $error = "Image size must be less than 2MB.";
         } else {
             $image = file_get_contents($_FILES['image']['tmp_name']);
@@ -76,10 +80,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ssdsi", $title, $description, $price, $category, $product_id);
     }
     
-    // Only execute if there are no errors.
+    // Only execute if there are no errors
     if (!isset($error) && isset($stmt)) {
         if ($stmt->execute()) {
-            header("Location: seller_index.php");
+            header("Location: listings.php");
             exit;
         } else {
             $error = "Error updating product: " . $stmt->error;

@@ -218,7 +218,7 @@ require_once __DIR__ . '/../../includes/header.php';
                     </div>
                     <div class="col-md-6">
                         <label for="postal_code" class="form-label">Postal Code:</label>
-                        <input type="text" class="form-control" name="postal_code" id="postal_code" placeholder="4321">
+                        <input type="text" class="form-control" name="postal_code" id="postal_code" placeholder="4321" pattern="[0-9]{4,5}" maxlength="5" title="Enter digits only.">
                     </div>
                 </div>
             </div>
@@ -230,11 +230,11 @@ require_once __DIR__ . '/../../includes/header.php';
 <?php endif; ?>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Check if existing_address element exists before adding event listener
         const existingAddressSelect = document.getElementById('existing_address');
         if (existingAddressSelect) {
-            existingAddressSelect.addEventListener('change', function() {
+            existingAddressSelect.addEventListener('change', function () {
                 const opt = this.options[this.selectedIndex];
                 if (!this.value) {
                     document.getElementById('address_line').value = '';
@@ -286,6 +286,62 @@ require_once __DIR__ . '/../../includes/header.php';
         if (existingAddressSelect) {
             existingAddressSelect.addEventListener('change', updateFieldsRequired);
         }
+    });
+</script>
+
+<script>
+    // Save form data as user types
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all form fields we want to save
+        const existingAddressSelect = document.getElementById('existing_address');
+        const address_lineField = document.getElementById('address_line');
+        const cityField = document.getElementById('city');
+        const provinceField = document.getElementById('province');
+        const countryField = document.getElementById('country');
+        const postal_codeField = document.getElementById('postal_code');
+
+
+        // Function to save form data
+        function saveFormData() {
+            const formData = {
+                existing_address: existingAddressSelect ? existingAddressSelect.value : '',
+                address: address_lineField.value,
+                city: cityField.value,
+                province: provinceField.value,
+                country: countryField.value,
+                postal_code: postal_codeField.value
+            };
+
+            localStorage.setItem('addressFormData', JSON.stringify(formData));
+        }
+
+        // Add input event listeners to all fields
+        if (existingAddressSelect) {
+            existingAddressSelect.addEventListener('change', saveFormData);
+        }
+        address_lineField.addEventListener('input', saveFormData);
+        cityField.addEventListener('input', saveFormData);
+        provinceField.addEventListener('input', saveFormData);
+        countryField.addEventListener('input', saveFormData);
+        postal_codeField.addEventListener('input', saveFormData);
+
+        // Load saved form data if it exists
+        const savedData = JSON.parse(localStorage.getItem('addressFormData'));
+        if (savedData) {
+            if (existingAddressSelect) {
+                existingAddressSelect.value = savedData.existing_address || '';
+            }
+            address_lineField.value = savedData.address || '';
+            cityField.value = savedData.city || '';
+            provinceField.value = savedData.province || '';
+            countryField.value = savedData.country || '';
+            postal_codeField.value = savedData.postal_code || '';
+        }
+
+        // Clear saved data when form is submitted
+        document.querySelector('form').addEventListener('submit', function () {
+            localStorage.removeItem('addressFormData');
+        });
     });
 </script>
 

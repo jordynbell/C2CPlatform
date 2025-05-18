@@ -11,6 +11,11 @@ if (!isset($_SESSION["Email"])) {
     exit;
 }
 
+if ($_SESSION['Role'] != 'Admin') {
+    header("Location: ../index.php");
+    exit;
+}
+
 $pageTitle = "Edit user - Squito";
 
 $user_data = null;

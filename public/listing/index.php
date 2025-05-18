@@ -13,10 +13,10 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "View Listings - Squito";
 
-$stmt = $conn->prepare('SELECT product_id, title, description, category, price, status FROM product WHERE status = "Active" AND seller_id != ?');
+$stmt = $conn->prepare('SELECT product_id, title, description, category, price, status, image FROM product WHERE status = "Active" AND seller_id != ?');
 $stmt->bind_param("i", $_SESSION['User_ID']);
 $stmt->execute();
-$result = $stmt->get_result();
+$rows = $stmt->get_result();
 
 require_once __DIR__ . '/../../includes/header.php';
 
@@ -31,20 +31,19 @@ require_once __DIR__ . '/../../includes/header.php';
                 <th>Description</th>
                 <th>Category</th>
                 <th>Price</th>
+                <th>Image</th>
                 <th>Action</th>
             </tr>
-            <?php
-
-            while ($row = $result->fetch_assoc()) {
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($row['title']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['description']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-                echo "<td>R " . htmlspecialchars(number_format($row['price'], 2)) . "</td>";
-                echo "<td><a href='../order/create.php?product_id=" . htmlspecialchars($row['product_id']) . "' class='btn btn-primary'>Order</a></td>";
-                echo "</tr>";
-            }
-            ?>
+            <?php foreach ($rows as $row): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                    <td><?php echo htmlspecialchars($row['description']); ?></td>
+                    <td><?php echo htmlspecialchars($row['category']); ?></td>
+                    <td><?php echo 'R ' . htmlspecialchars(number_format($row['price'], 2)); ?></td>
+                    <td><img src="../listing/getImage.php?id=<?php echo htmlspecialchars($row['product_id']); ?>" alt="Product Image" class="img-thumbnail" style="width: 100px; height: 100px;"></td>
+                    <td><a href="../order/create.php?product_id=<?php echo htmlspecialchars($row['product_id']); ?>" class="btn btn-primary">Order</a></td>
+                </tr>
+            <?php endforeach; ?>
         </table>
     </div>
 </div>

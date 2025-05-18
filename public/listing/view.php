@@ -102,8 +102,9 @@ require_once __DIR__ . '/../../includes/header.php';
                 </form>
             </div>
         </div>
-    <?php endif; ?>
-    <div class="text-center mt-4">
-        <a href="index.php" class="btn btn-primary">Back to My Orders</a>
     </div>
-    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+<?php endif; ?>
+<div class="text-center mt-4">
+    <a href="seller_index.php" class="btn btn-primary">Back to My Orders</a>
+</div>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

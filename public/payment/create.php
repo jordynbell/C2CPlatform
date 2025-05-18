@@ -177,7 +177,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
         <div class="mb-2">
             <label for="price">Total:</label>
-            <input type="text" name="price" id="price" value="<?php echo "R " . number_format($amount, ) ?>"
+            <input type="text" name="price" id="price" value="<?php echo "R " . number_format($amount, 2) ?>"
                 class="form-control" readonly><br>
         </div>
 

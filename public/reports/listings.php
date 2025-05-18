@@ -18,27 +18,10 @@ if ($_SESSION['Role'] != 'Admin') {
 
 $pageTitle = "All Listings - Squito";
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $product_id = $_POST['product_id'];
-    $seller_id = $_SESSION['User_ID'];
-
-    if (isset(($_POST['action'])))
-    {
-        if ($_POST['action'] == 'delete')
-        {
-            $stmt = $conn->prepare('UPDATE product SET status = "Deleted" WHERE product_id = ? AND seller_id = ?');
-            $stmt->bind_param("ii", $product_id, $seller_id);
-            if (!$stmt->execute()) {
-                echo "Error: " / $stmt->error;
-            }
-        }
-        elseif ($_POST['action'] == 'edit')
-        {
-            header("Location: ../listing/edit.php?id=" . $product_id);
-            exit;
-        }
-    }
-}
+$seller_id = $_SESSION["User_ID"];
+$stmt = $conn->prepare('SELECT product_id, title, description, category, price, status FROM product');
+$stmt->execute();
+$result = $stmt->get_result();
 
 require_once __DIR__ . '/../../includes/header.php';
 
@@ -57,43 +40,81 @@ require_once __DIR__ . '/../../includes/header.php';
                 <th>Status</th>
                 <th>Action</th>
             </tr>
-            <?php
+            <?php foreach ($result as $row): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['product_id']); ?></td>
+                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                    <td><?php echo htmlspecialchars($row['description']); ?></td>
+                    <td><?php echo htmlspecialchars($row['category']); ?></td>
+                    <td><?php echo 'R ' . htmlspecialchars(number_format($row['price'], 2)); ?></td>
+                    <td><?php echo htmlspecialchars($row['status']); ?></td>
+                    <?php if ($row['status'] == 'Sold' || $row['status'] == 'Deleted'): ?>
+                        <td><a href="listing_view.php?id=<?php echo htmlspecialchars($row['product_id']); ?>"
+                                class="btn btn-primary">View</a></td>
+                    <?php else: ?>
+                        <td class="d-flex gap-2">
+                            <a href="listing_view.php?id=<?php echo htmlspecialchars($row['product_id']); ?>"
+                                class="btn btn-primary">View</a>
+                            <a href="listing_edit.php?id=<?php echo htmlspecialchars($row['product_id']); ?>"
+                                class="btn btn-warning text-white">Edit</a>
 
-            $seller_id = $_SESSION["User_ID"];
-            $stmt = $conn->prepare('SELECT product_id, title, description, category, price, status FROM product');
-            $stmt->execute();
-            $result = $stmt->get_result();
+                            <form action="listing_delete.php" method="POST" style="display:inline-block; margin-right:5px;"
+                                id="deleteForm_<?php echo $row['product_id']; ?>">
+                                <input type="hidden" name="product_id"
+                                    value="<?php echo htmlspecialchars($row['product_id']); ?>">
+                                <input type="hidden" name="action" value="delete">
+                                <button type="button" class="btn btn-danger delete-btn"
+                                    data-product-id="<?php echo $row['product_id']; ?>">Delete</button>
+                            </form>
+                        </td>
+                    <?php endif; ?>
 
-            while ($row = $result->fetch_assoc()) {
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($row['product_id']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['title']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['description']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-                echo "<td>R " . htmlspecialchars(number_format($row['price'],2)) . "</td>";
-                echo "<td>" . htmlspecialchars($row['status']) . "</td>";
-                if ($row['status'] == 'Sold' || $row['status'] == 'Deleted') {
-                    echo "<td></td>";
-                } else {
-                    echo "<td>
-                        <form action='' method='POST' style='display:inline-block; margin-right:5px;'>
-                            <input type='hidden' name='product_id' value='" . htmlspecialchars($row['product_id']) . "'>
-                            <input type='hidden' name='action' value='delete'>
-                            <button type='submit' class='btn btn-danger'>Delete</button>
-                        </form>
-                        <form action='' method='POST' style='display:inline-block;'>
-                            <input type='hidden' name='product_id' value='" . htmlspecialchars($row['product_id']) . "'>
-                            <input type='hidden' name='action' value='edit'>
-                            <button type='submit' class='btn btn-primary'>Edit</button>
-                        </form>
-                    </td>";
-                }
-                echo "</tr>";
-            }
-            ?>
+                </tr>
+            <?php endforeach; ?>
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm Deletion</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this listing?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
+        const confirmButton = document.getElementById('confirmDelete');
+        let currentFormId = null;
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                currentFormId = 'deleteForm_' + this.getAttribute('data-product-id');
+                modal.show();
+            });
+        });
+
+        confirmButton.addEventListener('click', function () {
+            if (currentFormId) {
+                document.getElementById(currentFormId).submit();
+                modal.hide();
+            }
+        });
+    });
+</script>
 
 <?php
 require_once __DIR__ . '/../../includes/footer.php';
