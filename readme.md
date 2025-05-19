@@ -1,5 +1,3 @@
 Welcome to the readme file for Squito.
 
-I shall start off the project by implementing basic html elements with php to ensure that server-side functionality was focused on before hand.
-
-Thereafter, I shall implement bootstrap, css, js, and jquery to further optimise the site. I may make use of toastr for notifications. 
+This is a basic readme file that briefly describes the website, Squito. Squito is the name of the C2C Platform I am developing for a final year web development project. I am using HTML5, CSS, JS, and Bootstrap. I have added basic C2C functionality, inclusive of basic admin reporting.
