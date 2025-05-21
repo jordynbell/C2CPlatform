@@ -43,7 +43,7 @@ require_once __DIR__ . '/../../includes/header.php';
                     <td><?php echo 'R ' . htmlspecialchars(number_format($row['price'], 2)); ?></td>
                     <td><?php echo htmlspecialchars($row['status']); ?></td>
                     <?php if ($row['status'] == 'Sold' || $row['status'] == 'Deleted'): ?>
-                        <td><a href="view.php?id=<?php echo htmlspecialchars($row['product_id']); ?>"
+                        <td><a href="view.php?id=<?php echo htmlspecialchars($row['product_id']); ?>&source=seller"
                                 class="btn btn-primary">View</a></td>
                     <?php else: ?>
                         <td>
