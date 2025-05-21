@@ -3,8 +3,6 @@
 session_start();
 require_once __DIR__ . '/../../lib/db.php';
 
-$incorrectPassword = false;
-$errorMessage = '';
 $name = '';
 $surname = '';
 $email = '';
@@ -140,61 +138,72 @@ require_once __DIR__ . '/../../includes/header.php';
             <p class="mb-0">Already have an account? <a href="login.php">Login here</a></p>
         </div>
     </div>
+</div>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
-            aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Error</strong>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                <?php echo $errorMessage; ?>
-            </div>
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
+        <div class="toast-body" id="toastMessage"></div>
     </div>
+</div>
 
-    <script>
+<script>
+    // Display toast message if it exists in session
+    <?php if (isset($_SESSION['toast_message'])): ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const capitalizeInputs = document.querySelectorAll('.auto-capitalise');
+            // Set message and style
+            toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
+            toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
 
-            capitalizeInputs.forEach(input => {
-                if (input.value.length > 0) {
-                    input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3500
+            });
+            bsToast.show();
+
+            // Clear session variables
+            <?php
+            unset($_SESSION['toast_message']);
+            unset($_SESSION['toast_type']);
+            ?>
+        });
+    <?php endif; ?>
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const capitalizeInputs = document.querySelectorAll('.auto-capitalise');
+
+        capitalizeInputs.forEach(input => {
+            if (input.value.length > 0) {
+                input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
+            }
+
+            input.addEventListener('input', function(e) {
+                let value = e.target.value;
+                if (value.length > 0) {
+                    e.target.value = value.charAt(0).toUpperCase() + value.slice(1);
                 }
+            });
 
-                input.addEventListener('input', function (e) {
-                    let value = e.target.value;
-                    if (value.length > 0) {
-                        e.target.value = value.charAt(0).toUpperCase() + value.slice(1);
-                    }
-                });
-
-                input.addEventListener('blur', function (e) {
-                    let value = e.target.value.trim();
-                    if (value.length > 0) {
-                        e.target.value = value.split(' ')
-                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                            .join(' ');
-                    }
-                });
+            input.addEventListener('blur', function(e) {
+                let value = e.target.value.trim();
+                if (value.length > 0) {
+                    e.target.value = value.split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                }
             });
         });
-
-        <?php if ($incorrectPassword): ?>
-            document.addEventListener('DOMContentLoaded', function () {
-                var toastElement = document.getElementById('errorToast');
-                var toast = new bootstrap.Toast(toastElement, {
-                    autohide: true,
-                    delay: 3500,
-                    animation: true
-                });
-                toast.show();
-            });
-        <?php endif; ?>
-    </script>
-    <?php
-    require_once __DIR__ . '/../../includes/footer.php';
-    ?>
+    });
+</script>
+<?php
+require_once __DIR__ . '/../../includes/footer.php';
+?>

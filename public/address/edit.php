@@ -48,9 +48,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $update_stmt->bind_param("sssssii", $address_line, $city, $province, $country, $postal_code, $address_id, $user_id);
 
     if ($update_stmt->execute()) {
+        // Set toast success messages
+        $_SESSION['toast_message'] = "Address edited successfully!";
+        $_SESSION['toast_type'] = "success";
+
         header("Location: index.php");
         exit;
     } else {
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Failed to edit address. Please try again.";
+        $_SESSION['toast_type'] = "error";
+
         $error = "Failed to update address. Please try again.";
     }
 }

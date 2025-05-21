@@ -25,12 +25,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("isssss", $user_id, $address_line, $city, $province, $country, $postal_code);
 
     if ($stmt->execute()) {
+        // Set toast success messages
+        $_SESSION['toast_message'] = "Address created successfully!";
+        $_SESSION['toast_type'] = "success";
+
         header("Location: index.php");
         exit;
     } else {
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Failed to create address. Please try again.";
+        $_SESSION['toast_type'] = "error";
+
         header("Location: create.php");
         exit;
-
     }
 }
 
@@ -79,7 +86,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <script>
     // Save form data as user types
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         // Get all form fields we want to save
         const addressLineField = document.getElementById('address_line');
         const cityField = document.getElementById('city');
@@ -119,7 +126,7 @@ require_once __DIR__ . '/../../includes/header.php';
         }
 
         // Clear saved data when form is submitted
-        document.querySelector('form').addEventListener('submit', function () {
+        document.querySelector('form').addEventListener('submit', function() {
             localStorage.removeItem('createAddressFormData');
         });
     });

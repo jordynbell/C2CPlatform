@@ -4,9 +4,7 @@ session_start();
 
 require_once __DIR__ . '/../../lib/db.php';
 
-$loginError = false;
 $email = '';
-$errorMessage = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
@@ -22,7 +20,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (password_verify($password, $db_password)) {
 
             if ($isActive != 1) {
-                $_SESSION['flash_error'] = 'account_inactive';
+                // Set toast error messages
+                $_SESSION['toast_message'] = "Your account is not active. Please contact support.";
+                $_SESSION['toast_type'] = "error";
+
                 $_SESSION['form_data'] = [
                     'email' => $email,
                 ];
@@ -41,10 +42,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['User_ID'] = $user['user_id'];
             $_SESSION['Role'] = $user['role'];
 
+            // Set toast success messages
+            $_SESSION['toast_message'] = "Login successful!";
+            $_SESSION['toast_type'] = "success";
+
             header("Location: ../index.php");
             exit;
         } else {
-            $_SESSION['flash_error'] = 'pwd_incorrect';
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Invalid email or password.";
+            $_SESSION['toast_type'] = "error";
+
             $_SESSION['form_data'] = [
                 'email' => $email,
             ];
@@ -52,23 +60,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit;
         }
     } else {
-        $_SESSION['flash_error'] = 'invalid_credentials';
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Invalid email or password.";
+        $_SESSION['toast_type'] = "error";
+
         $_SESSION['form_data'] = [
             'email' => $email,
         ];
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }
-}
-
-if (isset($_SESSION['flash_error'])) {
-    $loginError = true;
-    if ($_SESSION['flash_error'] === 'account_inactive') {
-        $errorMessage = 'Your account is inactive. Please contact support for assistance.';
-    } else {
-        $errorMessage = 'Invalid email or password. Please try again.';
-    }
-    unset($_SESSION['flash_error']);
 }
 
 if (isset($_SESSION['form_data'])) {
@@ -112,29 +113,38 @@ require_once __DIR__ . '/../../includes/header.php';
 </div>
 
 <div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
-        aria-atomic="true">
+    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
-            <strong class="me-auto">Error</strong>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                aria-label="Close"></button>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-        <div class="toast-body">
-            <?php echo $errorMessage; ?>
-        </div>
+        <div class="toast-body" id="toastMessage"></div>
     </div>
 </div>
 
 <script>
-    <?php if ($loginError): ?>
-        document.addEventListener('DOMContentLoaded', function () {
-            var toastElement = document.getElementById('errorToast');
-            var toast = new bootstrap.Toast(toastElement, {
+    // Display toast message if it exists in session
+    <?php if (isset($_SESSION['toast_message'])): ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Set message and style
+            toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
+            toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
+
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast, {
                 autohide: true,
-                delay: 3500,
-                animation: true
+                delay: 3500
             });
-            toast.show();
+            bsToast.show();
+
+            // Clear session variables
+            <?php
+            unset($_SESSION['toast_message']);
+            unset($_SESSION['toast_type']);
+            ?>
         });
     <?php endif; ?>
 </script>

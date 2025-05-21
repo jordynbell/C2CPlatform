@@ -23,9 +23,17 @@ $isActive = 0;
 $stmt = $conn->prepare('UPDATE address SET isActive = ? WHERE address_id = ? AND user_id = ?');
 $stmt->bind_param("iii", $isActive, $address_id, $user_id);
 if ($stmt->execute()) {
+    // Set toast success messages
+    $_SESSION['toast_message'] = "Address deleted successfully!";
+    $_SESSION['toast_type'] = "success";
+
     header("Location: index.php");
     exit;
 } else {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Failed to delete address. Please try again.";
+    $_SESSION['toast_type'] = "error";
+    
     $_SESSION['error'] = "Failed to delete address. Please try again.";
 }
 $stmt->close();
