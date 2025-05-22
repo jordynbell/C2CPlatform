@@ -16,7 +16,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $role = "Normal";
 
     if (strlen($password) < 8) {
-        $_SESSION['flash_error'] = 'pwd_length';
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Password must be at least 8 characters long.";
+        $_SESSION['toast_type'] = "danger";
+
         $_SESSION['form_data'] = [
             'name' => $name,
             'surname' => $surname,
@@ -25,7 +28,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     } else if ($password !== $confirm_password) {
-        $_SESSION['flash_error'] = 'pwd_mismatch';
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Passwords do not match.";
+        $_SESSION['toast_type'] = "danger";
+
         $_SESSION['form_data'] = [
             'name' => $name,
             'surname' => $surname,
@@ -39,7 +45,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $stmt->store_result();
         if ($stmt->num_rows > 0) {
-            $_SESSION['flash_error'] = 'email_exists';
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Email already exists. Please use a different email.";
+            $_SESSION['toast_type'] = "danger";
+
             $_SESSION['form_data'] = [
                 'name' => $name,
                 'surname' => $surname,
@@ -55,28 +64,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("sssss", $name, $surname, $email, $hashed_password, $role);
 
         if ($stmt->execute()) {
+            // Set toast success messages
+            $_SESSION['toast_message'] = "Registration successful! You can now log in.";
+            $_SESSION['toast_type'] = "success";
+
             header("Location: login.php");
             exit;
         } else {
+            // Set toast error messages
+            $_SESSION['toast_message'] = "An error occurred during registration. Please try again.";
+            $_SESSION['toast_type'] = "danger";
+
             echo "Error: " . $stmt->error;
         }
     }
-}
-
-if (isset($_SESSION['flash_error'])) {
-    $incorrectPassword = true;
-
-    if ($_SESSION['flash_error'] === 'pwd_length') {
-        $errorMessage = "Password must be at least 8 characters long.";
-    } else if ($_SESSION['flash_error'] === 'pwd_mismatch') {
-        $errorMessage = "Passwords do not match.";
-    } else if ($_SESSION['flash_error'] === 'email_exists') {
-        $errorMessage = "Email already exists. Please use a different email.";
-    } else {
-        $errorMessage = "An unknown error occurred.";
-    }
-
-    unset($_SESSION['flash_error']);
 }
 
 if (isset($_SESSION['form_data'])) {

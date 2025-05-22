@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($isActive != 1) {
                 // Set toast error messages
                 $_SESSION['toast_message'] = "Your account is not active. Please contact support.";
-                $_SESSION['toast_type'] = "error";
+                $_SESSION['toast_type'] = "danger";
 
                 $_SESSION['form_data'] = [
                     'email' => $email,
@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             // Set toast error messages
             $_SESSION['toast_message'] = "Invalid email or password.";
-            $_SESSION['toast_type'] = "error";
+            $_SESSION['toast_type'] = "danger";
 
             $_SESSION['form_data'] = [
                 'email' => $email,
@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Set toast error messages
         $_SESSION['toast_message'] = "Invalid email or password.";
-        $_SESSION['toast_type'] = "error";
+        $_SESSION['toast_type'] = "danger";
 
         $_SESSION['form_data'] = [
             'email' => $email,

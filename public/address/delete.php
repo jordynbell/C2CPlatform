@@ -32,9 +32,7 @@ if ($stmt->execute()) {
 } else {
     // Set toast error messages
     $_SESSION['toast_message'] = "Failed to delete address. Please try again.";
-    $_SESSION['toast_type'] = "error";
-    
-    $_SESSION['error'] = "Failed to delete address. Please try again.";
+    $_SESSION['toast_type'] = "danger";
 }
 $stmt->close();
 ?>
