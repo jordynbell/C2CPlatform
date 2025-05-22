@@ -7,7 +7,24 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+    
     header("Location: ../auth/login.php");
+    exit;
+}
+
+if (!isset($_GET['order_id']) || !is_numeric($_GET['order_id'])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Invalid order ID.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+    
+    header("Location: ../order/index.php");
     exit;
 }
 
@@ -16,6 +33,7 @@ $reason = isset($_GET['reason']) ? htmlspecialchars($_GET['reason']) : 'payment_
 
 $pageTitle = "Payment Failed- Squito";
 
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 

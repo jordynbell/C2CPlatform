@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -18,10 +24,14 @@ $amount = isset($_POST['price']) ? $_POST['price'] : null;
 $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : null;
 
 if (!isset($_POST['order_id']) || !isset($_POST['product_id']) || !isset($_POST['price'])) {
-    // Log the error
-    error_log("Missing required payment parameters: " . json_encode($_POST));
-    // Redirect back with error
-    header("Location: ../index.php?error=missing_payment_parameters");
+
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Invalid request.";
+    $_SESSION['toast_type'] = "danger";
+
+    $conn->close();
+
+    header("Location: ../order/index.php");
     exit;
 }
 
@@ -29,6 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $payment_date = (new DateTime('now', new DateTimeZone('GMT+2')))->format('Y-m-d H:i:s');
     if ($order_id <= 0) {
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Invalid order ID.";
+        $_SESSION['toast_type'] = "danger";
+
+        $conn->close();
+
         header("Location: ../order/index.php");
         exit;
     }
@@ -39,17 +55,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $check_order_exists_stmt->execute();
         $result = $check_order_exists_stmt->get_result();
         if ($result->num_rows == 0) {
+            $check_order_exists_stmt->close();
+
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Order not found.";
+            $_SESSION['toast_type'] = "danger";
+
+            $conn->close();
+
             // Order does not exist
             header("Location: ../order/index.php");
             exit;
         }
+        $check_order_exists_stmt->close();
 
         $check_paid_stmt = $conn->prepare('SELECT * FROM `order` WHERE order_id = ? AND status = "Paid"');
         $check_paid_stmt->bind_param("i", $order_id);
         $check_paid_stmt->execute();
         $result = $check_paid_stmt->get_result();
+        $check_paid_stmt->close();
 
         if ($result->num_rows > 0) {
+
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Order already paid.";
+            $_SESSION['toast_type'] = "warning";
+
+            $conn->close();
+
             // Order already paid
             header("Location: ../order/index.php");
             exit;
@@ -71,12 +104,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $cancel_status = 'Cancelled';
                 $cancel_stmt->bind_param("sii", $cancel_status, $product_id, $order_id);
                 if ($cancel_stmt->execute()) {
+
                     $cancel_stmt->close();
                 } else {
+                    $conn->close();
+
                     header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
                     exit;
                 }
             } else {
+
+                $conn->close();
+
                 header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
                 exit;
             }
@@ -87,6 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($update_stmt->execute()) {
                 $update_stmt->close();
             } else {
+                $conn->close();
+
                 header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
                 exit;
             }
@@ -99,7 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($shipment_stmt->execute()) {
                 $shipment_stmt->close();
             } else {
-                echo "Failed to update shipment status: " . $shipment_stmt->error;
+                $conn->close();
+
                 header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
                 exit;
             }
@@ -111,26 +153,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($shipment_cleanup_stmt->execute()) {
                 $shipment_cleanup_stmt->close();
             } else {
-                error_log("Failed to cancel other shipments: " . $shipment_cleanup_stmt->error);
+                $conn->close();
+
+                header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
+                exit;
             }
 
             $sale_stmt = $conn->prepare('INSERT INTO sale (product_id, price, date_sold) VALUES (?, ?, ?)');
             $sale_stmt->bind_param("ids", $product_id, $amount, $payment_date);
             if ($sale_stmt->execute()) {
                 $sale_stmt->close();
+
+                $conn->close();
+
                 header("Location: success.php?order_id=" . $order_id);
                 exit;
             } else {
+                $conn->close();
+
                 header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
                 exit;
             }
 
         } else {
+            $conn->close();
+
             header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
             exit;
         }
+    } else {
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Invalid request.";
+        $_SESSION['toast_type'] = "danger";
+
+        $conn->close();
+
+        header("Location: ../order/index.php");
+        exit;
     }
 }
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 
@@ -191,6 +254,43 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     </form>
 </div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
+<script>
+    // Display toast message if it exists in session
+    <?php if (isset($_SESSION['toast_message'])): ?>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Set message and style
+            toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
+            toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
+
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3500
+            });
+            bsToast.show();
+
+            // Clear session variables
+            <?php
+            unset($_SESSION['toast_message']);
+            unset($_SESSION['toast_type']);
+            ?>
+        });
+    <?php endif; ?>
+</script>
 
 <script>
     // Simple formatting code for card fields

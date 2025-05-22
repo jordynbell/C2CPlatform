@@ -18,6 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_result($db_password, $isActive);
         $stmt->fetch();
         if (password_verify($password, $db_password)) {
+            $stmt->close();
 
             if ($isActive != 1) {
                 // Set toast error messages
@@ -27,6 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['form_data'] = [
                     'email' => $email,
                 ];
+
+                $conn->close();
+
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit;
             }
@@ -38,6 +42,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
+            
+            $stmt->close();
 
             $_SESSION['User_ID'] = $user['user_id'];
             $_SESSION['Role'] = $user['role'];
@@ -46,9 +52,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['toast_message'] = "Login successful!";
             $_SESSION['toast_type'] = "success";
 
+            $conn->close();
+
             header("Location: ../index.php");
             exit;
         } else {
+            $stmt->close();
+
             // Set toast error messages
             $_SESSION['toast_message'] = "Invalid email or password.";
             $_SESSION['toast_type'] = "danger";
@@ -56,10 +66,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['form_data'] = [
                 'email' => $email,
             ];
+
+            $conn->close();
+
             header("Location: " . $_SERVER['PHP_SELF']);
             exit;
         }
     } else {
+        $stmt->close();
+
         // Set toast error messages
         $_SESSION['toast_message'] = "Invalid email or password.";
         $_SESSION['toast_type'] = "danger";
@@ -67,6 +82,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['form_data'] = [
             'email' => $email,
         ];
+
+        $conn->close();
+        
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }

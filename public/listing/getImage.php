@@ -12,16 +12,23 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $result = $stmt->get_result();
     
     if ($row = $result->fetch_assoc()) {
+        $stmt->close();
 
         $imageData = $row['image'];
         $info = @getimagesizefromstring($imageData);
         
         if ($info !== false) {
+
+            $conn->close();
+            
             // Set the correct content type based on detected format
             header("Content-Type: " . $info['mime']);
             echo $imageData;
             exit;
         } else {
+
+            $conn->close();
+
             // Fallback to jpeg if mime type cannot be detected.
             header("Content-Type: image/jpeg");
             echo $imageData;
@@ -30,6 +37,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     }
 }
 
+$conn->close();
 
 header("HTTP/1.0 404 Not Found");
 ?>

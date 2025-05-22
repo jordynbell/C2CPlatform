@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -18,6 +24,12 @@ $product_data = null;
 
 
 if (!isset($_GET['id'])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "No product ID provided.";
+    $_SESSION['toast_type'] = "danger";
+
+    $conn->close();
+
     // If no ID provided, redirect to seller's listings
     header("Location: seller_index.php");
     exit;
@@ -33,8 +45,14 @@ if ($product_result->num_rows > 0) {
     $product_data = $product_result->fetch_assoc();
     $stmt->close();
 } else {
-    // Improve error handling
-    $_SESSION['error_message'] = "No product found or you do not have permission to edit this product.";
+    // Set toast error messages
+    $_SESSION['toast_message'] = "No product found or you do not have permission to edit this product.";
+    $_SESSION['toast_type'] = "danger";
+
+    $stmt->close();
+
+    $conn->close();
+
     header("Location: seller_index.php");
     exit;
 }
@@ -52,16 +70,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fileType = mime_content_type($_FILES['image']['tmp_name']);
 
         if (!in_array($fileType, $allowedMimeTypes)) {
-            $error = "Only JPG, JPEG and PNG images are allowed.";
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Only JPG, JPEG and PNG images are allowed.";
+            $_SESSION['toast_type'] = "danger";
         } else if ($_FILES['image']['size'] > 2000000) { // 2MB limit
-            $error = "Image size must be less than 2MB.";
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Image size must be less than 2MB.";
+            $_SESSION['toast_type'] = "danger";
         } else {
             $image = file_get_contents($_FILES['image']['tmp_name']);
-            
+
             // Update with new image
             $stmt = $conn->prepare("UPDATE product SET title = ?, description = ?, price = ?, category = ?, image = ? WHERE product_id = ? and status = 'active'");
             if (!$stmt) {
-                echo "Error preparing statement: " . $conn->error;
+                // Set toast error messages
+                $_SESSION['toast_message'] = "Error preparing statement: " . $conn->error;
+                $_SESSION['toast_type'] = "danger";
                 exit;
             }
             $stmt->bind_param("ssdssi", $title, $description, $price, $category, $image, $product_id);
@@ -70,23 +94,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Update without new image if no new image is uploaded by the seller.
         $stmt = $conn->prepare("UPDATE product SET title = ?, description = ?, price = ?, category = ? WHERE product_id = ? and status = 'active'");
         if (!$stmt) {
-            echo "Error preparing statement: " . $conn->error;
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Error preparing statement: " . $conn->error;
+            $_SESSION['toast_type'] = "danger";
             exit;
         }
         $stmt->bind_param("ssdsi", $title, $description, $price, $category, $product_id);
     }
-    
+
     // Only execute if there are no errors.
-    if (!isset($error) && isset($stmt)) {
+    if (isset($stmt)) {
         if ($stmt->execute()) {
+            $stmt->close();
+
+            // Set toast success messages
+            $_SESSION['toast_message'] = "Product updated successfully.";
+            $_SESSION['toast_type'] = "success";
+
+            $conn->close();
+
             header("Location: seller_index.php");
             exit;
         } else {
-            $error = "Error updating product: " . $stmt->error;
+            $stmt->close();
+            
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Error updating product: " . $stmt->error;
+            $_SESSION['toast_type'] = "danger";
+
+            $conn->close();
+
+            header("Location: seller_index.php");
+            exit;
         }
-        $stmt->close();
     }
 }
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 
@@ -181,6 +225,43 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 </div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
+<script>
+    // Display toast message if it exists in session
+    <?php if (isset($_SESSION['toast_message'])): ?>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Set message and style
+            toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
+            toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
+
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3500
+            });
+            bsToast.show();
+
+            // Clear session variables
+            <?php
+            unset($_SESSION['toast_message']);
+            unset($_SESSION['toast_type']);
+            ?>
+        });
+    <?php endif; ?>
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

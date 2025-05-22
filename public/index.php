@@ -1,14 +1,3 @@
-<!-- 
-What do add to landing page:
-1. Create a hero section with a background image and a welcome message.
-2. Second section can have the benefits of using Squito.
-3. Display a few products, perhaps usig sql ... limit 3-5
-4. Reviews section with user testimonials.
-5. FAQ using bootstrap accordion.
-6. Get started section prompting user to register.
-
--->
-
 <?php
 
 require_once __DIR__ . '/../lib/db.php';
@@ -27,6 +16,12 @@ if (isset($_SESSION["User_ID"])) {
         $result = $result->fetch_assoc();
     } else {
         $stmt->close();
+        // Set toast error messages
+        $_SESSION['toast_message'] = "User not found.";
+        $_SESSION['toast_type'] = "danger";
+
+        $conn->close();
+        
         header("Location: auth/login.php");
         exit;
     }
@@ -65,9 +60,9 @@ $accordionFirstSentences = [
 ];
 $accordionContents = [
     "Squito is a platform that allows you to buy and sell products. We have a wide range of categories, including electronics, clothing, and more. Our platform is user-friendly and secure, making it easy for you to find what you're looking for.",
-    "To sell your products, simply create an account and list your items. You can set your own prices and manage your listings easily.",
+    "All you need to do is go to the listings page, and hit create listing! You can set your own prices and manage your listings easily.",
     "To buy products, browse our listings, click order on whichever item you desire, and follow the ordering process.",
-    "You can track your orders in the orders section in the navigation bar. Here, you can view your order history, and view the specifics of your order."
+    "Here, you can view your order history, and view the specifics of your order."
 ];
 
 if (isset($_SESSION["User_ID"])) {
@@ -86,6 +81,8 @@ if ($products_results->num_rows > 0) {
 }
 
 $pageTitle = "Home - Squito";
+
+$conn->close();
 
 require_once __DIR__ . '/../includes/header.php';
 

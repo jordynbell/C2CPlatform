@@ -9,6 +9,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "You must be logged in to create a listing.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -25,9 +31,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fileType = mime_content_type($_FILES['image']['tmp_name']);
 
     if (!in_array($fileType, $allowedMimeTypes)) {
-        $error = "Only JPG, JPEG and PNG images are allowed.";
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Invalid image format. Only JPG, JPEG, and PNG are allowed.";
+        $_SESSION['toast_type'] = "danger";
     } else if ($_FILES['image']['size'] > 2000000) { // 2MB limit
-        $error = "Image size must be less than 2MB.";
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Image size exceeds 2MB limit.";
+        $_SESSION['toast_type'] = "danger";
     } else {
         $image = file_get_contents($_FILES['image']['tmp_name']);
 
@@ -35,16 +45,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ssdsiss", $title, $description, $price, $category, $seller_id, $status, $image);
 
         if ($stmt->execute()) {
-            header("Location: index.php");
             $stmt->close();
+            
+            // Set toast success messages
+            $_SESSION['toast_message'] = "Listing created successfully.";
+            $_SESSION['toast_type'] = "success";
+
+            $conn->close();
+
+            header("Location: index.php");
             exit;
         } else {
-            $error = "Error: " . $stmt->error;
+            $stmt->close();
+
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Failed to create listing. Please try again.";
+            $_SESSION['toast_type'] = "danger";
         }
     }
 }
 
+$conn->close();
+
 require_once __DIR__ . '/../../includes/header.php';
+
 ?>
 
 <div class="container mx-auto mt-5 mb-5" style="max-width: 60rem;">
@@ -100,6 +124,43 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 </div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
+<script>
+    // Display toast message if it exists in session
+    <?php if (isset($_SESSION['toast_message'])): ?>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Set message and style
+            toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
+            toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
+
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3500
+            });
+            bsToast.show();
+
+            // Clear session variables
+            <?php
+            unset($_SESSION['toast_message']);
+            unset($_SESSION['toast_type']);
+            ?>
+        });
+    <?php endif; ?>
+</script>
 
 <script>
     // Save form data as user types

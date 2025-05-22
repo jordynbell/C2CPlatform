@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -18,6 +24,9 @@ $stmt = $conn->prepare('SELECT product_id, title, description, category, price, 
 $stmt->bind_param("i", $seller_id);
 $stmt->execute();
 $result = $stmt->get_result();
+$stmt->close();
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 
@@ -101,7 +110,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <script>
     // Display toast message if it exists in session
     <?php if (isset($_SESSION['toast_message'])): ?>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
 

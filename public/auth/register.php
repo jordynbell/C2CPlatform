@@ -25,6 +25,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'surname' => $surname,
             'email' => $email
         ];
+
+        $conn->close();
+
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     } else if ($password !== $confirm_password) {
@@ -37,6 +40,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'surname' => $surname,
             'email' => $email
         ];
+
+        $conn->close();
+
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     } else {
@@ -45,6 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $stmt->store_result();
         if ($stmt->num_rows > 0) {
+            $stmt->close();
             // Set toast error messages
             $_SESSION['toast_message'] = "Email already exists. Please use a different email.";
             $_SESSION['toast_type'] = "danger";
@@ -54,9 +61,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'surname' => $surname,
                 'email' => $email
             ];
+
+            $conn->close();
+
             header("Location: " . $_SERVER['PHP_SELF']);
             exit;
         }
+        $stmt->close();
 
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
@@ -64,18 +75,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("sssss", $name, $surname, $email, $hashed_password, $role);
 
         if ($stmt->execute()) {
+            $stmt->close();
+
             // Set toast success messages
             $_SESSION['toast_message'] = "Registration successful! You can now log in.";
             $_SESSION['toast_type'] = "success";
 
+            $conn->close();
+
             header("Location: login.php");
             exit;
         } else {
+            $stmt->close();
+
             // Set toast error messages
             $_SESSION['toast_message'] = "An error occurred during registration. Please try again.";
             $_SESSION['toast_type'] = "danger";
-
-            echo "Error: " . $stmt->error;
         }
     }
 }
@@ -102,13 +117,13 @@ require_once __DIR__ . '/../../includes/header.php';
                 <form action="" method="post">
                     <div class="mb-3 mt-2">
                         <label for="name">Name</label>
-                        <input type="text" name="name" id="name" class="form-control auto-capitalise" autocomplete="true" required
-                            value="<?php echo $name; ?>">
+                        <input type="text" name="name" id="name" class="form-control auto-capitalise"
+                            autocomplete="true" required value="<?php echo $name; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="surname">Surname</label>
-                        <input type="text" name="surname" id="surname" class="form-control auto-capitalise" autocomplete="true" required
-                            value="<?php echo $surname; ?>">
+                        <input type="text" name="surname" id="surname" class="form-control auto-capitalise"
+                            autocomplete="true" required value="<?php echo $surname; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="email">Email</label>
@@ -154,7 +169,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <script>
     // Display toast message if it exists in session
     <?php if (isset($_SESSION['toast_message'])): ?>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
 
@@ -179,7 +194,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const capitalizeInputs = document.querySelectorAll('.auto-capitalise');
 
         capitalizeInputs.forEach(input => {
@@ -187,14 +202,14 @@ require_once __DIR__ . '/../../includes/header.php';
                 input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
             }
 
-            input.addEventListener('input', function(e) {
+            input.addEventListener('input', function (e) {
                 let value = e.target.value;
                 if (value.length > 0) {
                     e.target.value = value.charAt(0).toUpperCase() + value.slice(1);
                 }
             });
 
-            input.addEventListener('blur', function(e) {
+            input.addEventListener('blur', function (e) {
                 let value = e.target.value.trim();
                 if (value.length > 0) {
                     e.target.value = value.split(' ')

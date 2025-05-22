@@ -7,11 +7,23 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
 
 if (!isset($_GET['order_id']) || !is_numeric($_GET['order_id'])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Invalid order ID.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+    
     header("Location: ../order/index.php");
     exit;
 }
@@ -22,8 +34,15 @@ $stmt = $conn->prepare('SELECT * FROM `order` WHERE order_id = ? AND customer_id
 $stmt->bind_param('ii', $order_id, $customer_id);
 $stmt->execute();
 $result = $stmt->get_result();
+$stmt->close();
 
 if ($result->num_rows === 0) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Order not found or not paid.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     // Order does not exist or is not paid
     header("Location: ../order/index.php");
     exit;
@@ -31,7 +50,7 @@ if ($result->num_rows === 0) {
 
 $pageTitle = "Payment Suceeded- Squito";
 
-
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 

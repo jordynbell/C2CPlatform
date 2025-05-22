@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -14,6 +20,12 @@ if (!isset($_SESSION["Email"])) {
 $user_id = $_SESSION['User_ID'];
 $address_id = $_GET['id'] ?? null;
 if ($address_id === null) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Invalid address ID.";
+    $_SESSION['toast_type'] = "danger";
+
+    $conn->close();
+    
     header("Location: index.php");
     exit;
 }
@@ -27,12 +39,21 @@ if ($stmt->execute()) {
     $_SESSION['toast_message'] = "Address deleted successfully!";
     $_SESSION['toast_type'] = "success";
 
+    $stmt->close();
+
+    $conn->close();
+
     header("Location: index.php");
     exit;
 } else {
+    $stmt->close();
+
+    $conn->close();
+
     // Set toast error messages
     $_SESSION['toast_message'] = "Failed to delete address. Please try again.";
     $_SESSION['toast_type'] = "danger";
+    
 }
-$stmt->close();
+
 ?>

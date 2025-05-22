@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -15,6 +21,12 @@ $pageTitle = "Edit Address - Squito";
 
 // Check if address ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Invalid address ID.";
+    $_SESSION['toast_type'] = "danger";
+
+    $conn->close();
+
     header("Location: index.php");
     exit;
 }
@@ -27,9 +39,16 @@ $stmt = $conn->prepare("SELECT * FROM address WHERE address_id = ? AND user_id =
 $stmt->bind_param("ii", $address_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
+$stmt->close();
 
 if ($result->num_rows === 0) {
     // Address not found or doesn't belong to current user
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Address not found or doesn't belong to you.";
+    $_SESSION['toast_type'] = "danger";
+
+    $conn->close();
+    
     header("Location: index.php");
     exit;
 }
@@ -48,18 +67,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $update_stmt->bind_param("sssssii", $address_line, $city, $province, $country, $postal_code, $address_id, $user_id);
 
     if ($update_stmt->execute()) {
+        $update_stmt->close();
         // Set toast success messages
         $_SESSION['toast_message'] = "Address edited successfully!";
         $_SESSION['toast_type'] = "success";
 
+        $conn->close();
+
         header("Location: index.php");
         exit;
     } else {
+        $update_stmt->close();
         // Set toast error messages
         $_SESSION['toast_message'] = "Failed to edit address. Please try again.";
         $_SESSION['toast_type'] = "danger";
+
+        $conn->close();
+        
+        header("Location: index.php");
+        exit;
     }
 }
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 ?>

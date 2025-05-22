@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -22,6 +28,7 @@ $address_stmt->bind_param("i", $user_id);
 $address_stmt->execute();
 $address_result = $address_stmt->get_result();
 $addresses = $address_result->fetch_all(MYSQLI_ASSOC);
+
 $address_stmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['product_id'])) {
@@ -32,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['product_id'])) {
     $stmt->execute();
     $result = $stmt->get_result();
     $product_data = $result->fetch_assoc();
+
     $stmt->close();
 }
 
@@ -45,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute();
         $result = $stmt->get_result();
         $product_data = $result->fetch_assoc();
+
         $stmt->close();
 
         if (isset($_POST['action']) && $_POST['action'] == 'confirm') {
@@ -58,9 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $new_address_stmt->bind_param("issssi", $user_id, $_POST['address_line'], $_POST['city'], $_POST['province'], $_POST['country'], $_POST['postal_code']);
                     if ($new_address_stmt->execute()) {
                         $address_id = $new_address_stmt->insert_id;
+                        
                         $new_address_stmt->close();
                     } else {
-                        echo "Failed to insert new address: " . $new_address_stmt->error;
+                        $new_address_stmt->close();
+
+                        // Set toast error messages
+                        $_SESSION['toast_message'] = "Failed to insert address: " . $new_address_stmt->error;
+                        $_SESSION['toast_type'] = "danger";
+
+                        $conn->close();
+
+                        header("Location: index.php");
+                        exit;
                     }
                 }
             }
@@ -89,8 +108,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
                 if ($shipment_stmt->execute()) {
                     $shipment_stmt->close();
+
+                    // Set toast success messages
+                    $_SESSION['toast_message'] = "Order placed successfully!";
+                    $_SESSION['toast_type'] = "success";
                 } else {
-                    echo "Failed to insert shipment: " . $shipment_stmt->error;
+                    $shipment_stmt->close();
+
+                    // Set toast error messages
+                    $_SESSION['toast_message'] = "Failed to insert shipment: " . $shipment_stmt->error;
+                    $_SESSION['toast_type'] = "danger";
+
+                    $conn->close();
+
+                    header("Location: index.php");
+                    exit;
                 }
 
                 echo '
@@ -105,7 +137,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     ';
                 exit;
             } else {
-                echo "Failed to place order: " . $insert_stmt->error;
+                $insert_stmt->close();
+
+                // Set toast error messages
+                $_SESSION['toast_message'] = "Failed to insert order: " . $insert_stmt->error;
+                $_SESSION['toast_type'] = "danger";
+
+                $conn->close();
+
+                header("Location: index.php");
+                exit;
             }
         }
     }
@@ -139,11 +180,13 @@ require_once __DIR__ . '/../../includes/header.php';
                                 <div class="row">
                                     <div class="col-sm-6 mb-2">
                                         <strong>Category:</strong>
-                                        <span class="badge bg-secondary"><?php echo htmlspecialchars($product_data['category']); ?></span>
+                                        <span
+                                            class="badge bg-secondary"><?php echo htmlspecialchars($product_data['category']); ?></span>
                                     </div>
                                     <div class="col-sm-6 mb-2">
                                         <strong>Price:</strong>
-                                        <span class="fs-5 text-primary fw-bold">R <?php echo htmlspecialchars(number_format($product_data['price'], 2)); ?></span>
+                                        <span class="fs-5 text-primary fw-bold">R
+                                            <?php echo htmlspecialchars(number_format($product_data['price'], 2)); ?></span>
                                     </div>
                                     <div class="col-sm-6 mb-2">
                                         <strong>Seller:</strong>
@@ -151,7 +194,8 @@ require_once __DIR__ . '/../../includes/header.php';
                                     </div>
                                     <div class="col-sm-6 mb-2">
                                         <strong>Status:</strong>
-                                        <span class="badge bg-success"><?php echo htmlspecialchars($product_data['status']); ?></span>
+                                        <span
+                                            class="badge bg-success"><?php echo htmlspecialchars($product_data['status']); ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -174,7 +218,8 @@ require_once __DIR__ . '/../../includes/header.php';
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-check mb-2 p-2 border rounded-3 bg-light">
-                                <input class="form-check-input" type="radio" name="delivery_method" id="delivery" value="Delivery" checked>
+                                <input class="form-check-input" type="radio" name="delivery_method" id="delivery"
+                                    value="Delivery" checked>
                                 <label class="form-check-label d-block ms-2" for="delivery">
                                     <div class="fw-bold">Delivery</div>
                                     <small class="text-muted">We'll ship this item to your address</small>
@@ -183,7 +228,8 @@ require_once __DIR__ . '/../../includes/header.php';
                         </div>
                         <div class="col-md-6">
                             <div class="form-check mb-2 p-2 border rounded-3 bg-light">
-                                <input class="form-check-input" type="radio" name="delivery_method" id="collection" value="Collection">
+                                <input class="form-check-input" type="radio" name="delivery_method" id="collection"
+                                    value="Collection">
                                 <label class="form-check-label d-block ms-2" for="collection">
                                     <div class="fw-bold">Collection</div>
                                     <small class="text-muted">Pick up from the seller's location</small>
@@ -245,7 +291,8 @@ require_once __DIR__ . '/../../includes/header.php';
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <label for="postal_code" class="form-label">Postal Code:</label>
-                            <input type="text" class="form-control" name="postal_code" id="postal_code" placeholder="4321" pattern="[0-9]{4,5}" maxlength="5">
+                            <input type="text" class="form-control" name="postal_code" id="postal_code" placeholder="4321"
+                                pattern="[0-9]{4,5}" maxlength="5">
                         </div>
                     </div>
                 </div>
@@ -264,122 +311,161 @@ require_once __DIR__ . '/../../includes/header.php';
             </div>
         </div>
     <?php endif; ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if existing_address element exists before adding event listener
-            const existingAddressSelect = document.getElementById('existing_address');
-            if (existingAddressSelect) {
-                existingAddressSelect.addEventListener('change', function() {
-                    const opt = this.options[this.selectedIndex];
-                    if (!this.value) {
-                        document.getElementById('address_line').value = '';
-                        document.getElementById('city').value = '';
-                        document.getElementById('province').value = '';
-                        document.getElementById('country').value = '';
-                        document.getElementById('postal_code').value = '';
-                        return;
-                    }
+</div>
 
-                    document.getElementById('address_line').value = opt.dataset.line;
-                    document.getElementById('city').value = opt.dataset.city;
-                    document.getElementById('province').value = opt.dataset.province;
-                    document.getElementById('country').value = opt.dataset.country;
-                    document.getElementById('postal_code').value = opt.dataset.postal;
-                });
-            }
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
 
-            const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
-            const deliveryAddressDiv = document.getElementById('deliveryAddress');
-            const addressFields = [
-                document.getElementById('address_line'),
-                document.getElementById('city'),
-                document.getElementById('province'),
-                document.getElementById('country'),
-                document.getElementById('postal_code')
-            ];
+<script>
+    // Display toast message if it exists in session
+    <?php if (isset($_SESSION['toast_message'])): ?>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
 
-            function updateFieldsRequired() {
-                const isDelivery = document.querySelector('input[name="delivery_method"]:checked').value === 'Delivery';
-                const existingAddressSelect = document.getElementById('existing_address');
-                const hasExistingAddress = existingAddressSelect && existingAddressSelect.value !== '';
+            // Set message and style
+            toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
+            toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
 
-                deliveryAddressDiv.style.display = isDelivery ? 'block' : 'none';
-
-                addressFields.forEach(field => {
-                    if (field) {
-                        field.required = isDelivery && !hasExistingAddress;
-                    }
-                });
-            }
-
-            updateFieldsRequired();
-
-            deliveryMethodRadios.forEach(radio => {
-                radio.addEventListener('change', updateFieldsRequired);
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3500
             });
+            bsToast.show();
 
-            if (existingAddressSelect) {
-                existingAddressSelect.addEventListener('change', updateFieldsRequired);
-            }
+            // Clear session variables
+            <?php
+            unset($_SESSION['toast_message']);
+            unset($_SESSION['toast_type']);
+            ?>
         });
-    </script>
+    <?php endif; ?>
+</script>
 
-    <script>
-        // Save form data as user types
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all form fields we want to save
-            const existingAddressSelect = document.getElementById('existing_address');
-            const address_lineField = document.getElementById('address_line');
-            const cityField = document.getElementById('city');
-            const provinceField = document.getElementById('province');
-            const countryField = document.getElementById('country');
-            const postal_codeField = document.getElementById('postal_code');
-
-
-            // Function to save form data
-            function saveFormData() {
-                const formData = {
-                    existing_address: existingAddressSelect ? existingAddressSelect.value : '',
-                    address: address_lineField.value,
-                    city: cityField.value,
-                    province: provinceField.value,
-                    country: countryField.value,
-                    postal_code: postal_codeField.value
-                };
-
-                localStorage.setItem('addressFormData', JSON.stringify(formData));
-            }
-
-            // Add input event listeners to all fields
-            if (existingAddressSelect) {
-                existingAddressSelect.addEventListener('change', saveFormData);
-            }
-            address_lineField.addEventListener('input', saveFormData);
-            cityField.addEventListener('input', saveFormData);
-            provinceField.addEventListener('input', saveFormData);
-            countryField.addEventListener('input', saveFormData);
-            postal_codeField.addEventListener('input', saveFormData);
-
-            // Load saved form data if it exists
-            const savedData = JSON.parse(localStorage.getItem('addressFormData'));
-            if (savedData) {
-                if (existingAddressSelect) {
-                    existingAddressSelect.value = savedData.existing_address || '';
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if existing_address element exists before adding event listener
+        const existingAddressSelect = document.getElementById('existing_address');
+        if (existingAddressSelect) {
+            existingAddressSelect.addEventListener('change', function () {
+                const opt = this.options[this.selectedIndex];
+                if (!this.value) {
+                    document.getElementById('address_line').value = '';
+                    document.getElementById('city').value = '';
+                    document.getElementById('province').value = '';
+                    document.getElementById('country').value = '';
+                    document.getElementById('postal_code').value = '';
+                    return;
                 }
-                address_lineField.value = savedData.address || '';
-                cityField.value = savedData.city || '';
-                provinceField.value = savedData.province || '';
-                countryField.value = savedData.country || '';
-                postal_codeField.value = savedData.postal_code || '';
-            }
 
-            // Clear saved data when form is submitted
-            document.querySelector('form').addEventListener('submit', function() {
-                localStorage.removeItem('addressFormData');
+                document.getElementById('address_line').value = opt.dataset.line;
+                document.getElementById('city').value = opt.dataset.city;
+                document.getElementById('province').value = opt.dataset.province;
+                document.getElementById('country').value = opt.dataset.country;
+                document.getElementById('postal_code').value = opt.dataset.postal;
             });
-        });
-    </script>
+        }
 
-    <?php
-    require_once __DIR__ . '/../../includes/footer.php';
-    ?>
+        const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
+        const deliveryAddressDiv = document.getElementById('deliveryAddress');
+        const addressFields = [
+            document.getElementById('address_line'),
+            document.getElementById('city'),
+            document.getElementById('province'),
+            document.getElementById('country'),
+            document.getElementById('postal_code')
+        ];
+
+        function updateFieldsRequired() {
+            const isDelivery = document.querySelector('input[name="delivery_method"]:checked').value === 'Delivery';
+            const existingAddressSelect = document.getElementById('existing_address');
+            const hasExistingAddress = existingAddressSelect && existingAddressSelect.value !== '';
+
+            deliveryAddressDiv.style.display = isDelivery ? 'block' : 'none';
+
+            addressFields.forEach(field => {
+                if (field) {
+                    field.required = isDelivery && !hasExistingAddress;
+                }
+            });
+        }
+
+        updateFieldsRequired();
+
+        deliveryMethodRadios.forEach(radio => {
+            radio.addEventListener('change', updateFieldsRequired);
+        });
+
+        if (existingAddressSelect) {
+            existingAddressSelect.addEventListener('change', updateFieldsRequired);
+        }
+    });
+</script>
+
+<script>
+    // Save form data as user types
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all form fields we want to save
+        const existingAddressSelect = document.getElementById('existing_address');
+        const address_lineField = document.getElementById('address_line');
+        const cityField = document.getElementById('city');
+        const provinceField = document.getElementById('province');
+        const countryField = document.getElementById('country');
+        const postal_codeField = document.getElementById('postal_code');
+
+
+        // Function to save form data
+        function saveFormData() {
+            const formData = {
+                existing_address: existingAddressSelect ? existingAddressSelect.value : '',
+                address: address_lineField.value,
+                city: cityField.value,
+                province: provinceField.value,
+                country: countryField.value,
+                postal_code: postal_codeField.value
+            };
+
+            localStorage.setItem('addressFormData', JSON.stringify(formData));
+        }
+
+        // Add input event listeners to all fields
+        if (existingAddressSelect) {
+            existingAddressSelect.addEventListener('change', saveFormData);
+        }
+        address_lineField.addEventListener('input', saveFormData);
+        cityField.addEventListener('input', saveFormData);
+        provinceField.addEventListener('input', saveFormData);
+        countryField.addEventListener('input', saveFormData);
+        postal_codeField.addEventListener('input', saveFormData);
+
+        // Load saved form data if it exists
+        const savedData = JSON.parse(localStorage.getItem('addressFormData'));
+        if (savedData) {
+            if (existingAddressSelect) {
+                existingAddressSelect.value = savedData.existing_address || '';
+            }
+            address_lineField.value = savedData.address || '';
+            cityField.value = savedData.city || '';
+            provinceField.value = savedData.province || '';
+            countryField.value = savedData.country || '';
+            postal_codeField.value = savedData.postal_code || '';
+        }
+
+        // Clear saved data when form is submitted
+        document.querySelector('form').addEventListener('submit', function () {
+            localStorage.removeItem('addressFormData');
+        });
+    });
+</script>
+
+<?php
+require_once __DIR__ . '/../../includes/footer.php';
+?>

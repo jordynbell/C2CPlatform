@@ -7,11 +7,23 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
 
 if ($_SESSION['Role'] != 'Admin') {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "You do not have permission to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../index.php");
     exit;
 }
@@ -23,6 +35,19 @@ $stmt->execute();
 $result = $stmt->get_result();
 $shipments = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+if ($result->num_rows === 0) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "No shipments found.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
+    header("Location: ../index.php");
+    exit;
+}
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 

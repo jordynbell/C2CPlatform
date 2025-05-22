@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+    
     header("Location: ../auth/login.php");
     exit;
 }
@@ -25,21 +31,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("isssss", $user_id, $address_line, $city, $province, $country, $postal_code);
 
     if ($stmt->execute()) {
+        $stmt->close();
         // Set toast success messages
         $_SESSION['toast_message'] = "Address created successfully!";
         $_SESSION['toast_type'] = "success";
 
+        $conn->close();
+
         header("Location: index.php");
         exit;
     } else {
+        $stmt->close();
         // Set toast error messages
         $_SESSION['toast_message'] = "Failed to create address. Please try again.";
         $_SESSION['toast_type'] = "danger";
+
+        $conn->close();
 
         header("Location: create.php");
         exit;
     }
 }
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 

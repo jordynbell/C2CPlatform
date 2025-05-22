@@ -7,11 +7,23 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
 
 if ($_SESSION['Role'] != 'Admin') {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "You do not have permission to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../index.php");
     exit;
 }
@@ -21,7 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $seller_id = $_SESSION['User_ID'];
 
     if (!$product_id) {
-        $_SESSION['error'] = "Product ID is required";
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Invalid product ID.";
+        $_SESSION['toast_type'] = "warning";
+
+        $conn->close();
+
         header("Location: listings.php");
         exit;
     }
@@ -30,9 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $check_orders->bind_param("i", $product_id);
     $check_orders->execute();
     $result = $check_orders->get_result();
+    $check_orders->close();
 
     if ($result->num_rows > 0) {
-        $_SESSION['error'] = "This product cannot be deleted because it has pending orders.";
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Cannot delete the listing. There are pending or processing orders associated with this product.";
+        $_SESSION['toast_type'] = "warning";
+
+        $conn->close();
+
         header("Location: listings.php");
         exit;
     }
@@ -42,15 +65,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("i", $product_id);
 
     if ($stmt->execute()) {
-        $_SESSION['success'] = "Listing deleted successfully";
+        // Set toast success messages
+        $_SESSION['toast_message'] = "Product deleted successfully.";
+        $_SESSION['toast_type'] = "success";
     } else {
-        $_SESSION['error'] = "Error: " . $stmt->error;
+        // Set toast error messages
+        $_SESSION['toast_message'] = "Failed to delete the product.";
+        $_SESSION['toast_type'] = "danger";
     }
+
+    $stmt->close();
+
+    $conn->close();
 
     // Redirect back to the seller index page
     header("Location: listings.php");
     exit;
 } else {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Invalid request method.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+    
     // If accessed directly without POST request, redirect to seller index
     header("Location: listings.php");
     exit;

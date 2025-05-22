@@ -7,16 +7,54 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
 
 if ($_SESSION['Role'] != 'Admin') {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "You do not have permission to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../index.php");
     exit;
 }
 
+$total = 0;
+
+$stmt = $conn->prepare('SELECT * FROM sale');
+$stmt->execute();
+$result = $stmt->get_result();
+$sales = $result->fetch_all(MYSQLI_ASSOC);
+
+$stmt->close();
+
+if ($result->num_rows === 0) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "No sales found.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
+    header("Location: ../index.php");
+    exit;
+}
+
+foreach ($sales as $sale) {
+    $total += (float) $sale['price'];
+}
+
 $pageTitle = "Sales Report - Squito";
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 
@@ -32,17 +70,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 <th>Date Sold</th>
                 <th>Total Price</th>
             </tr>
-            <?php
-            $total = 0;
-
-            $stmt = $conn->prepare('SELECT * FROM sale');
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $sales = $result->fetch_all(MYSQLI_ASSOC);
-            $stmt->close();
-
-            foreach ($sales as $sale):
-                $total += (float) $sale['price']; ?>
+            <?php foreach ($sales as $sale): ?>
 
                 <tr>
                     <td><?php echo htmlspecialchars($sale['sale_id']); ?></td>

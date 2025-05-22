@@ -7,6 +7,12 @@ if (!isset($_SESSION)) {
 }
 
 if (!isset($_SESSION["Email"])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Please log in to access this page.";
+    $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -17,6 +23,9 @@ $stmt = $conn->prepare('SELECT product_id, title, description, category, price, 
 $stmt->bind_param("i", $_SESSION['User_ID']);
 $stmt->execute();
 $rows = $stmt->get_result();
+$stmt->close();
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 

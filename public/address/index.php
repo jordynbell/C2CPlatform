@@ -10,6 +10,8 @@ if (!isset($_SESSION["Email"])) {
     // Redirect to login page if user is not logged in
     $_SESSION['toast_message'] = "Please log in to access this page.";
     $_SESSION['toast_type'] = "warning";
+
+    $conn->close();
     
     header("Location: ../auth/login.php");
     exit;
@@ -26,6 +28,8 @@ while ($row = $result->fetch_assoc()) {
     $addresses[] = $row;
 }
 $stmt->close();
+
+$conn->close();
 
 require_once __DIR__ . '/../../includes/header.php';
 ?>
