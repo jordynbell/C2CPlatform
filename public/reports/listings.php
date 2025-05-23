@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -24,12 +25,14 @@ if ($_SESSION['Role'] != 'Admin') {
 
     $conn->close();
 
+    // Redirect to home page
     header("Location: ../index.php");
     exit;
 }
 
 $pageTitle = "All Listings - Squito";
 
+// Display all listings
 $seller_id = $_SESSION["User_ID"];
 $stmt = $conn->prepare('SELECT product_id, title, description, category, price, status FROM product');
 $stmt->execute();
@@ -44,6 +47,7 @@ if ($result->num_rows === 0) {
 
     $conn->close();
 
+    // Redirect to home page
     header("Location: ../index.php");
     exit;
 }
@@ -121,7 +125,19 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
+
 <script>
+    // Initialize Bootstrap modal for deletions
     document.addEventListener('DOMContentLoaded', function () {
         const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
         const confirmButton = document.getElementById('confirmDelete');
@@ -142,16 +158,6 @@ require_once __DIR__ . '/../../includes/header.php';
         });
     });
 </script>
-
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Notification</strong>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toastMessage"></div>
-    </div>
-</div>
 
 <script>
     // Display toast message if it exists in session

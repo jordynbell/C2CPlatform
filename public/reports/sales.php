@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -24,12 +25,14 @@ if ($_SESSION['Role'] != 'Admin') {
 
     $conn->close();
 
+    // Redirect to home page
     header("Location: ../index.php");
     exit;
 }
 
 $total = 0;
 
+// Display all sales records
 $stmt = $conn->prepare('SELECT * FROM sale');
 $stmt->execute();
 $result = $stmt->get_result();
@@ -48,6 +51,7 @@ if ($result->num_rows === 0) {
     exit;
 }
 
+// Work out the sales total
 foreach ($sales as $sale) {
     $total += (float) $sale['price'];
 }

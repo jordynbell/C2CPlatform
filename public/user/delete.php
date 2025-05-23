@@ -12,6 +12,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -23,6 +24,7 @@ if ($_SESSION['Role'] != 'Admin') {
 
     $conn->close();
 
+    // Redirect to home page
     header("Location: ../index.php");
     exit;
 }
@@ -45,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $conn->close();
 
+            // Redirect if accessed directly without POST
             header("Location: index.php");
             exit;
         }

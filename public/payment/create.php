@@ -13,12 +13,14 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
 
 $pageTitle = "Payment - Squito";
 
+// Set variables
 $order_id = isset($_POST['order_id']) ? $_POST['order_id'] : 0;
 $amount = isset($_POST['price']) ? $_POST['price'] : null;
 $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : null;
@@ -31,6 +33,7 @@ if (!isset($_POST['order_id']) || !isset($_POST['product_id']) || !isset($_POST[
 
     $conn->close();
 
+    // Redirect to order page
     header("Location: ../order/index.php");
     exit;
 }
@@ -45,11 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $conn->close();
 
+        // Redirect to order page
         header("Location: ../order/index.php");
         exit;
     }
 
     if (isset($_POST['action']) && $_POST['action'] == 'confirm') {
+        // Select all the order details for the order ID
         $check_order_exists_stmt = $conn->prepare('SELECT * FROM `order` WHERE order_id = ?');
         $check_order_exists_stmt->bind_param("i", $order_id);
         $check_order_exists_stmt->execute();
@@ -69,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $check_order_exists_stmt->close();
 
+        // Check if the order is already paid
         $check_paid_stmt = $conn->prepare('SELECT * FROM `order` WHERE order_id = ? AND status = "Paid"');
         $check_paid_stmt->bind_param("i", $order_id);
         $check_paid_stmt->execute();
@@ -88,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit;
         }
 
+        // Insert payment details into payment table.
         $stmt = $conn->prepare('INSERT INTO payment (order_id, payment_date, amount) VALUES (?, ?, ?)');
         $stmt->bind_param("isi", $order_id, $payment_date, $amount);
 
@@ -100,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($update_stmt->execute()) {
                 $update_stmt->close();
 
+                // Cancel other orders for the same product
                 $cancel_stmt = $conn->prepare('UPDATE `order` SET status = ? WHERE product_id = ? AND order_id != ? AND status != "Paid"');
                 $cancel_status = 'Cancelled';
                 $cancel_stmt->bind_param("sii", $cancel_status, $product_id, $order_id);
@@ -120,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit;
             }
 
+            // Update product status to sold
             $update_stmt = $conn->prepare('UPDATE product SET status = ? WHERE product_id = ?');
             $new_status = 'Sold';
             $update_stmt->bind_param("si", $new_status, $product_id);
@@ -132,6 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit;
             }
 
+            // Update shipment status to shipped and set shipment date
             $shipment_stmt = $conn->prepare('UPDATE shipment SET delivery_status = ?, shipment_date = ? where order_id = ?');
             $shipment_status = 'Shipped';
             $shipment_date = (new DateTime('now', new DateTimeZone('GMT+2')))->format('Y-m-d H:i:s');
@@ -146,6 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit;
             }
 
+            // Cancel other shipments for the same product
             $shipment_cleanup_stmt = $conn->prepare('UPDATE shipment s JOIN `order` o ON s.order_id = o.order_id SET s.delivery_status = ? WHERE o.product_id = ? AND s.order_id != ? AND s.delivery_status != "Cancelled"');
             $cancel_status = 'Cancelled';
             $shipment_cleanup_stmt->bind_param("sii", $cancel_status, $product_id, $order_id);
@@ -159,6 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit;
             }
 
+            // Insert sale details into sale table once all other operations are successful
             $sale_stmt = $conn->prepare('INSERT INTO sale (product_id, price, date_sold) VALUES (?, ?, ?)');
             $sale_stmt->bind_param("ids", $product_id, $amount, $payment_date);
             if ($sale_stmt->execute()) {
@@ -177,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         } else {
             $conn->close();
-
+          
             header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
             exit;
         }

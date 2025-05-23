@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
     
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -24,10 +25,12 @@ if (!isset($_GET['order_id']) || !is_numeric($_GET['order_id'])) {
 
     $conn->close();
     
+    // Redirect to order page
     header("Location: ../order/index.php");
     exit;
 }
 
+// Initialise variables
 $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
 $reason = isset($_GET['reason']) ? htmlspecialchars($_GET['reason']) : 'payment_failed';
 
@@ -74,6 +77,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </div>
 
 <script>
+    // Set timer for redirection
     let counter = 5;
     const countdown = setInterval(() => {
         if (counter === 0) {

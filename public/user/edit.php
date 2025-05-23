@@ -89,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $conn->close();
 
+            // Redirect to index page
             header("Location: index.php");
             exit;
         }
@@ -216,6 +217,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
+    // Initialise Bootstrap modal for edits
     document.addEventListener('DOMContentLoaded', function () {
         const capitalizeInputs = document.querySelectorAll('.auto-capitalise');
         const editForm = document.querySelector('form[action="edit.php"][method="post"]');

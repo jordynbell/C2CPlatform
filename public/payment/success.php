@@ -28,8 +28,11 @@ if (!isset($_GET['order_id']) || !is_numeric($_GET['order_id'])) {
     exit;
 }
 
+// Initialise variables
 $order_id = $_GET['order_id'];
 $customer_id = $_SESSION['User_ID'];
+
+// Check if the order exists and is paid
 $stmt = $conn->prepare('SELECT * FROM `order` WHERE order_id = ? AND customer_id = ? AND status = "Paid" LIMIT 1');
 $stmt->bind_param('ii', $order_id, $customer_id);
 $stmt->execute();
@@ -89,6 +92,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </div>
 
 <script>
+    // Set timer for redirection
     let counter = 5;
     const countdown = setInterval(() => {
         if (counter === 0) {

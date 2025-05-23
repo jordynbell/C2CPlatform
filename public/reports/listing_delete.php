@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -24,6 +25,7 @@ if ($_SESSION['Role'] != 'Admin') {
 
     $conn->close();
 
+    // Redirect to home page
     header("Location: ../index.php");
     exit;
 }
@@ -39,11 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $conn->close();
 
+        // Redirect back to the seller index page
         header("Location: listings.php");
         exit;
     }
 
-    $check_orders = $conn->prepare("SELECT order_id FROM `order` WHERE product_id = ? AND status IN ('Pending', 'Processing')");
+    // Check if the order exists for the product and it's status is "Payment pending"
+    $check_orders = $conn->prepare("SELECT order_id FROM `order` WHERE product_id = ? AND status = 'Payment pending'");
     $check_orders->bind_param("i", $product_id);
     $check_orders->execute();
     $result = $check_orders->get_result();
@@ -56,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $conn->close();
 
+        // Redirect back to the listings page
         header("Location: listings.php");
         exit;
     }

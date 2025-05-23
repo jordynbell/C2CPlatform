@@ -7,6 +7,7 @@ if (!isset($_SESSION)) {
 }
 
 if (isset($_SESSION["User_ID"])) {
+    // Check if the user is logged in
     $user_id = $_SESSION["User_ID"];
     $stmt = $conn->prepare("SELECT * FROM user WHERE User_ID = ?");
     $stmt->bind_param("i", $user_id);
@@ -22,6 +23,7 @@ if (isset($_SESSION["User_ID"])) {
 
         $conn->close();
         
+        // Redirect to login page
         header("Location: auth/login.php");
         exit;
     }

@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -21,6 +22,7 @@ $pageTitle = "My Orders - Squito";
 
 $user_id = $_SESSION['User_ID'];
 
+// Select all orders for the logged-in user.
 $stmt = $conn->prepare('SELECT * FROM `order` WHERE customer_id = ?');
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -125,6 +127,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
+    // Handle cancellation confirmation with Bootstrap modal
     document.addEventListener('DOMContentLoaded', function () {
         const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
         const confirmButton = document.getElementById('confirmCancellation');

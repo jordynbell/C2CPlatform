@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -38,6 +39,7 @@ $pageTitle = "View Order Details - Squito";
 $sellerId = null;
 $status = isset($_GET['status']) ? $_GET['status'] : null;
 
+// Select the product details based on the product ID
 $stmt = $conn->prepare('SELECT * FROM product where product_id = ? LIMIT 1');
 $stmt->bind_param('i', $_GET['id']);
 $stmt->execute();
@@ -59,6 +61,7 @@ if (!$product) {
 
 $sellerId = $product['seller_id'];
 
+// Select the seller details based on the seller ID
 $stmt = $conn->prepare('SELECT name, surname FROM user where user_id = ? LIMIT 1');
 $stmt->bind_param('i', $sellerId);
 $stmt->execute();
@@ -72,6 +75,7 @@ if (!$seller) {
 
     $conn->close();
 
+    // Redirect to index page
     header("Location: index.php");
     exit;
 }

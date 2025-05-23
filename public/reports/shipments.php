@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -24,12 +25,14 @@ if ($_SESSION['Role'] != 'Admin') {
 
     $conn->close();
 
+    // Redirect to home page
     header("Location: ../index.php");
     exit;
 }
 
 $pageTitle = "Shipments - Squito";
 
+// Display all shipment records
 $stmt = $conn->prepare('SELECT * FROM shipment');
 $stmt->execute();
 $result = $stmt->get_result();

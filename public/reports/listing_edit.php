@@ -121,6 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $conn->close();
 
+            // Redirect back to the seller index page
             header("Location: listings.php");
             exit;
         } else {
@@ -266,6 +267,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
+    // Initialize Bootstrap modal for edit confirmation
     document.addEventListener('DOMContentLoaded', function () {
         const editForm = document.querySelector('form[action=""][method="post"]');
         const editButton = document.querySelector('[data-bs-target="#staticBackdrop"]');

@@ -30,6 +30,7 @@ if ($_SESSION['Role'] != 'Admin') {
 
 $pageTitle = "Users - Squito";
 
+// Select all users
 $stmt = $conn->prepare('SELECT * FROM user');
 $stmt->execute();
 $result = $stmt->get_result();
@@ -137,6 +138,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
+    // Handle delete button click and delete confirmation
     document.addEventListener('DOMContentLoaded', function () {
         const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
         const confirmButton = document.getElementById('confirmDelete');

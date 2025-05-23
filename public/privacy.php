@@ -4,6 +4,8 @@ $pageTitle = "About - Squito";
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
+
+<!-- This is the privacy policy page for Squito. -->
 <div class="container prose mx-auto py-8">
     <h1>Squito Privacy Policy</h1>
 

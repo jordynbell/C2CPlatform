@@ -30,6 +30,7 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 <script>
+    // Redirect to the home page after 5 seconds
     const basePath = "<?php echo $basePath; ?>";
     let counter = 5;
     const countdown = setInterval(() => {

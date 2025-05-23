@@ -78,6 +78,7 @@ if ($result->num_rows === 0) {
 
     $conn->close();
 
+    // Redirect to home page
     header("Location: ../index.php");
     exit;
 }

@@ -13,6 +13,7 @@ if (!isset($_SESSION["Email"])) {
 
     $conn->close();
 
+    // Redirect to login page
     header("Location: ../auth/login.php");
     exit;
 }
@@ -27,6 +28,7 @@ if ($order_id === null) {
 
     $conn->close();
 
+    // Redirect to index page
     header("Location: index.php");
     exit;
 }
@@ -38,6 +40,7 @@ $stmt->bind_param("ii", $order_id, $user_id);
 if ($stmt->execute()) {
     $stmt->close();
 
+    // Update the shipment status to cancelled
     $stmt = $conn->prepare('UPDATE shipment SET delivery_status = "Cancelled" WHERE order_id = ?');
     $stmt->bind_param("i", $order_id);
     if ($stmt->execute()) {
@@ -57,6 +60,7 @@ if ($stmt->execute()) {
 
     $conn->close();
 
+    // Redirect to index page
     header("Location: index.php");
     exit;
 } else {
@@ -68,6 +72,7 @@ if ($stmt->execute()) {
 
     $conn->close();
 
+    // Redirect to index page
     header("Location: index.php");
     exit;
 }
