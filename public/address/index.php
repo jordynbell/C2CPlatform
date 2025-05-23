@@ -11,8 +11,8 @@ if (!isset($_SESSION["Email"])) {
     $_SESSION['toast_message'] = "Please log in to access this page.";
     $_SESSION['toast_type'] = "warning";
 
-    $conn->close(); 
-    
+    $conn->close();
+
     header("Location: ../auth/login.php");
     exit;
 }
@@ -38,34 +38,37 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <div class="container">
     <h1 class="text-center">Addresses</h1>
-    <table class="table table-striped table-hover table-bordered" border="1">
-        <tr>
-            <th>Address ID</th>
-            <th>Address Line</th>
-            <th>City</th>
-            <th>Province</th>
-            <th>Country</th>
-            <th>Postal Code</th>
-            <th>Actions</th>
-        </tr>
-        <tbody>
-            <?php foreach ($addresses as $index => $address): ?>
-                <tr>
-                    <td><?php echo $index + 1; ?></td>
-                    <td><?php echo htmlspecialchars($address['address_line']); ?></td>
-                    <td><?php echo htmlspecialchars($address['city']); ?></td>
-                    <td><?php echo htmlspecialchars($address['province']); ?></td>
-                    <td><?php echo htmlspecialchars($address['country']); ?></td>
-                    <td><?php echo htmlspecialchars($address['postal_code']); ?></td>
-                    <td>
-                        <a href="edit.php?id=<?php echo $address['address_id']; ?>" class="btn btn-primary">Edit</a>
-                        <a href="#" class="btn btn-danger delete-btn"
-                            data-address-id="<?php echo $address['address_id']; ?>">Delete</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+    <h1 class="text-center">All Listings</h1>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered" border="1">
+            <tr>
+                <th>Address ID</th>
+                <th>Address Line</th>
+                <th>City</th>
+                <th>Province</th>
+                <th>Country</th>
+                <th>Postal Code</th>
+                <th>Actions</th>
+            </tr>
+            <tbody>
+                <?php foreach ($addresses as $index => $address): ?>
+                    <tr>
+                        <td><?php echo $index + 1; ?></td>
+                        <td><?php echo htmlspecialchars($address['address_line']); ?></td>
+                        <td><?php echo htmlspecialchars($address['city']); ?></td>
+                        <td><?php echo htmlspecialchars($address['province']); ?></td>
+                        <td><?php echo htmlspecialchars($address['country']); ?></td>
+                        <td><?php echo htmlspecialchars($address['postal_code']); ?></td>
+                        <td>
+                            <a href="edit.php?id=<?php echo $address['address_id']; ?>" class="btn btn-primary">Edit</a>
+                            <a href="#" class="btn btn-danger delete-btn"
+                                data-address-id="<?php echo $address['address_id']; ?>">Delete</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -100,7 +103,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <script>
     // Display toast message if it exists in session
     <?php if (isset($_SESSION['toast_message'])): ?>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
 
@@ -126,20 +129,20 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <script>
     // Uses Bootstrap 5 for modal functionality, initialises the modal
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
         const confirmButton = document.getElementById('confirmDelete');
         let deleteUrl = null;
 
         document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
+            button.addEventListener('click', function (e) {
                 e.preventDefault();
                 deleteUrl = 'delete.php?id=' + this.getAttribute('data-address-id');
                 modal.show();
             });
         });
 
-        confirmButton.addEventListener('click', function() {
+        confirmButton.addEventListener('click', function () {
             if (deleteUrl) {
                 window.location.href = deleteUrl;
                 modal.hide();

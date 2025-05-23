@@ -28,42 +28,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $seller_id = $_SESSION['User_ID'];
     $status = "Active";
 
-    $allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    $fileType = mime_content_type($_FILES['image']['tmp_name']);
-
-    if (!in_array($fileType, $allowedMimeTypes)) {
+    if (
+        !isset($_FILES['image']) ||
+        $_FILES['image']['error'] !== UPLOAD_ERR_OK ||
+        empty($_FILES['image']['tmp_name'])
+    ) {
         // Set toast error messages
-        $_SESSION['toast_message'] = "Invalid image format. Only JPG, JPEG, and PNG are allowed.";
-        $_SESSION['toast_type'] = "danger";
-    } else if ($_FILES['image']['size'] > 2000000) { // 2MB limit
-        // Set toast error messages
-        $_SESSION['toast_message'] = "Image size exceeds 2MB limit.";
+        $_SESSION['toast_message'] = "File upload failed. Please try again with a smaller image.";
         $_SESSION['toast_type'] = "danger";
     } else {
-        $image = file_get_contents($_FILES['image']['tmp_name']);
+        $allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        $fileType = mime_content_type($_FILES['image']['tmp_name']);
 
-        // Creates the listing
-        $stmt = $conn->prepare("INSERT INTO product (title, description, price, category, seller_id, status, image) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssdsiss", $title, $description, $price, $category, $seller_id, $status, $image);
-
-        if ($stmt->execute()) {
-            $stmt->close();
-            
-            // Set toast success messages
-            $_SESSION['toast_message'] = "Listing created successfully.";
-            $_SESSION['toast_type'] = "success";
-
-            $conn->close();
-
-            // Redirect to the index page on successful listing creation
-            header("Location: index.php");
-            exit;
-        } else {
-            $stmt->close();
-
+        if (!in_array($fileType, $allowedMimeTypes)) {
             // Set toast error messages
-            $_SESSION['toast_message'] = "Failed to create listing. Please try again.";
+            $_SESSION['toast_message'] = "Invalid image format. Only JPG, JPEG, and PNG are allowed.";
             $_SESSION['toast_type'] = "danger";
+        } else if ($_FILES['image']['size'] > 12000000) {
+            // Set toast error messages
+            $_SESSION['toast_message'] = "Image size exceeds 12MB limit.";
+            $_SESSION['toast_type'] = "danger";
+        } else {
+            $image = file_get_contents($_FILES['image']['tmp_name']);
+
+            // Creates the listing
+            $stmt = $conn->prepare("INSERT INTO product (title, description, price, category, seller_id, status, image) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssdsiss", $title, $description, $price, $category, $seller_id, $status, $image);
+
+            if ($stmt->execute()) {
+                $stmt->close();
+
+                // Set toast success messages
+                $_SESSION['toast_message'] = "Listing created successfully.";
+                $_SESSION['toast_type'] = "success";
+
+                $conn->close();
+
+                // Redirect to the index page on successful listing creation
+                header("Location: index.php");
+                exit;
+            } else {
+                $stmt->close();
+
+                // Set toast error messages
+                $_SESSION['toast_message'] = "Failed to create listing. Please try again.";
+                $_SESSION['toast_type'] = "danger";
+            }
         }
     }
 }
@@ -116,7 +126,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <input type="file" name="image" id="image" class="form-control"
                             accept="image/jpeg,image/jpg,image/png" required>
                         <small class="form-text text-muted">Upload an image for your listing (JPG, JPEG or PNG only, max
-                            2MB).</small>
+                            10MB).</small>
                     </div>
                     <div class="mb-3 d-flex justify-content-center">
                         <input type="submit" value="Create Listing" class="btn btn-primary mt-2 mb-2"

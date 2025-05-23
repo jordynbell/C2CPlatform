@@ -76,7 +76,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $product_id = $_POST['product_id'];
 
     // Check if a new image was uploaded
-    if (isset($_FILES['image']) && $_FILES['image']['size'] > 0) {
+    if (
+        isset($_FILES['image']) && $_FILES['image']['size'] > 0 &&
+        $_FILES['image']['error'] === UPLOAD_ERR_OK && !empty($_FILES['image']['tmp_name'])
+    ) {
         $allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
         $fileType = mime_content_type($_FILES['image']['tmp_name']);
 
@@ -84,9 +87,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Set toast error messages
             $_SESSION['toast_message'] = "Only JPG, JPEG and PNG images are allowed.";
             $_SESSION['toast_type'] = "danger";
-        } else if ($_FILES['image']['size'] > 2000000) { // 2MB limit
+        } else if ($_FILES['image']['size'] > 12000000) {
             // Set toast error messages
-            $_SESSION['toast_message'] = "Image size must be less than 2MB.";
+            $_SESSION['toast_message'] = "Image size must be less than 12MB.";
             $_SESSION['toast_type'] = "danger";
         } else {
             $image = file_get_contents($_FILES['image']['tmp_name']);
@@ -128,7 +131,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit;
         } else {
             $stmt->close();
-            
+
             // Set toast error messages
             $_SESSION['toast_message'] = "Error updating product: " . $stmt->error;
             $_SESSION['toast_type'] = "danger";
@@ -204,7 +207,7 @@ require_once __DIR__ . '/../../includes/header.php';
                             <input type="file" name="image" id="image" class="form-control"
                                 accept="image/jpeg,image/jpg,image/png">
                             <small class="form-text text-muted">Upload an image for your listing (JPG, JPEG or PNG only, max
-                                2MB).</small>
+                                10MB).</small>
                         </div>
                         <div class="mb-3 d-flex justify-content-center">
                             <button type="button" value="Edit Listing" class="form-control btn btn-primary"
@@ -301,6 +304,5 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <?php
-$conn->close();
 require_once __DIR__ . '/../../includes/footer.php';
 ?>

@@ -15,26 +15,6 @@ if (!isset($basePath)) {
   $basePath = $isProduction ? '' : '/C2CPlatform/public';
 }
 
-$current_path = $_SERVER['PHP_SELF'];
-$auth_paths = ['/auth/login.php', '/auth/register.php', '/C2CPlatform/public/auth/login.php', '/C2CPlatform/public/auth/register.php'];
-$public_paths = ['/about.php', '/C2CPlatform/public/about.php', '/index.php', '/C2CPlatform/public/index.php'];
-
-$is_public_page = false;
-
-// Check if the current path is in the public paths, otherwise check if it is in the auth paths
-
-foreach (array_merge($auth_paths, $public_paths) as $path) {
-  if (strpos($current_path, $path) !== false) {
-    $is_public_page = true;
-    break;
-  }
-}
-// Check if the user is logged in and if the page is not public
-if (!isset($_SESSION["User_ID"]) && !$is_public_page) {
-  header("Location: {$basePath}/auth/login.php");
-  exit;
-}
-
 $user_id = isset($_SESSION["User_ID"]) ? $_SESSION["User_ID"] : null;
 $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
 ?>
@@ -75,7 +55,7 @@ $role = isset($_SESSION["Role"]) ? $_SESSION["Role"] : null;
             </a>
             <ul class="dropdown-menu" aria-labelledby="addressesDropdown">
               <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/index.php">View Addresses</a></li>
-              <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/create.php">Create Addresses</a></li>
+              <li><a class="dropdown-item" href="<?php echo $basePath; ?>/address/create.php">Create Address</a></li>
             </ul>
           </li>
 
