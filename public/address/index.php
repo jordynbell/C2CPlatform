@@ -11,13 +11,15 @@ if (!isset($_SESSION["Email"])) {
     $_SESSION['toast_message'] = "Please log in to access this page.";
     $_SESSION['toast_type'] = "warning";
 
-    $conn->close();
+    $conn->close(); 
     
     header("Location: ../auth/login.php");
     exit;
 }
 
 $pageTitle = "Addresses - Squito";
+
+// Display addresses for the logged-in user
 
 $stmt = $conn->prepare("SELECT * FROM address WHERE user_id = ? AND isActive = 1");
 $stmt->bind_param("i", $_SESSION['User_ID']);
@@ -123,6 +125,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
+    // Uses Bootstrap 5 for modal functionality, initialises the modal
     document.addEventListener('DOMContentLoaded', function() {
         const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
         const confirmButton = document.getElementById('confirmDelete');

@@ -35,6 +35,17 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
+// Check if the product ID is set in the URL
+if (!isset($_GET['id'])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Product ID not provided.";
+    $_SESSION['toast_type'] = "danger";
+
+    $conn->close();
+
+    header("Location: seller_index.php");
+    exit;
+}
 $product_id = $_GET['id'];
 $stmt = $conn->prepare("SELECT * from product where product_id = ? AND seller_id = ? AND status = 'active'");
 $stmt->bind_param("ii", $product_id, $_SESSION['User_ID']);
@@ -264,6 +275,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
+    // Bootstrap modal for confirmation
     document.addEventListener('DOMContentLoaded', function () {
         const editForm = document.querySelector('form[action=""][method="post"]');
         const editButton = document.querySelector('[data-bs-target="#staticBackdrop"]');

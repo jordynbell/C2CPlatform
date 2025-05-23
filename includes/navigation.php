@@ -6,6 +6,8 @@ if (!isset($_SESSION)) {
   session_start();
 }
 
+// Set base path to ensure it works whilst hosted on AWS and locally
+
 if (!isset($basePath)) {
   $isProduction = (getenv('AWS_ENVIRONMENT') !== false
     || getenv('EB_ENVIRONMENT') !== false
@@ -18,13 +20,16 @@ $auth_paths = ['/auth/login.php', '/auth/register.php', '/C2CPlatform/public/aut
 $public_paths = ['/about.php', '/C2CPlatform/public/about.php', '/index.php', '/C2CPlatform/public/index.php'];
 
 $is_public_page = false;
+
+// Check if the current path is in the public paths, otherwise check if it is in the auth paths
+
 foreach (array_merge($auth_paths, $public_paths) as $path) {
   if (strpos($current_path, $path) !== false) {
     $is_public_page = true;
     break;
   }
 }
-
+// Check if the user is logged in and if the page is not public
 if (!isset($_SESSION["User_ID"]) && !$is_public_page) {
   header("Location: {$basePath}/auth/login.php");
   exit;

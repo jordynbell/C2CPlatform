@@ -28,11 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $conn->close();
 
+        // Redirect back to the seller_index page
         header("Location: seller_index.php");
         exit;
     }
 
-    $check_orders = $conn->prepare("SELECT order_id FROM `order` WHERE product_id = ? AND status IN ('Pending', 'Processing')");
+    // Check if the product is in any orders that are "Pending payment"
+    $check_orders = $conn->prepare("SELECT order_id FROM `order` WHERE product_id = ? AND status = 'Pending payment'");
     $check_orders->bind_param("i", $product_id);
     $check_orders->execute();
     $result = $check_orders->get_result();
@@ -46,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $conn->close();
 
+        // Redirect back to the seller index page
         header("Location: seller_index.php");
         exit;
     }

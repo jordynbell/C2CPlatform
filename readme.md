@@ -1,3 +1,3 @@
 Welcome to the readme file for Squito.
 
-This is a basic readme file that briefly describes the website, Squito. Squito is the name of the C2C Platform I am developing for a final year web development project. I am using HTML5, CSS, JS, and Bootstrap. I have added basic C2C functionality, inclusive of basic admin reporting.
+This is a basic readme file that briefly describes the website, Squito. Squito is the name of the C2C Platform I am developing for a final year web development project. I am using HTML5, CSS, JS, and Bootstrap. I have added basic C2C functionality, inclusive of basic admin reporting. Toast notifications were used for majority of the system's reporting functionality. The landing page uses multiple bootstrap components.

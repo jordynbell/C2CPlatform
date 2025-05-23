@@ -31,6 +31,7 @@ if ($order_id === null) {
     exit;
 }
 
+// Update the order to cancelled if the order_id is valid and the user_id matches
 $stmt = $conn->prepare('UPDATE `order` SET status = "Cancelled" WHERE order_id = ? AND customer_id = ?');
 $stmt->bind_param("ii", $order_id, $user_id);
 

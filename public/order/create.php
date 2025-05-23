@@ -19,10 +19,12 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "Create Order - Squito";
 
+// Initialise variables
 $user_id = $_SESSION['User_ID'];
 $product_data = null;
 $addresses = null;
 
+// Fetch user addresses if the address is active
 $address_stmt = $conn->prepare('SELECT * FROM address WHERE user_id = ? AND isActive = 1');
 $address_stmt->bind_param("i", $user_id);
 $address_stmt->execute();
@@ -34,6 +36,7 @@ $address_stmt->close();
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['product_id'])) {
     $product_id = $_GET['product_id'];
 
+    // Fetch product details
     $stmt = $conn->prepare('SELECT product_id, product.title, product.description, product.category, product.price, product.status, product.seller_id, user.name, user.surname FROM product INNER JOIN user ON product.seller_id = user.user_id WHERE product.product_id = ?');
     $stmt->bind_param("i", $product_id);
     $stmt->execute();
@@ -48,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($product_id) {
 
+        // Fetch product details
         $stmt = $conn->prepare('SELECT product_id, product.title, product.description, product.category, product.price, product.status, product.seller_id, user.name, user.surname FROM product INNER JOIN user ON product.seller_id = user.user_id WHERE product.product_id = ?');
         $stmt->bind_param("i", $product_id);
         $stmt->execute();
@@ -63,11 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if (!empty($_POST['existing_address'])) {
                     $address_id = $_POST['existing_address'];
                 } else {
+                    // Insert new address if created during order.
                     $new_address_stmt = $conn->prepare('INSERT INTO address (user_id, address_line, city, province, country, postal_code) VALUES (?, ?, ?, ?, ?, ?)');
                     $new_address_stmt->bind_param("issssi", $user_id, $_POST['address_line'], $_POST['city'], $_POST['province'], $_POST['country'], $_POST['postal_code']);
                     if ($new_address_stmt->execute()) {
                         $address_id = $new_address_stmt->insert_id;
-                        
+
                         $new_address_stmt->close();
                     } else {
                         $new_address_stmt->close();
@@ -89,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $price = $product_data['price'];
             $status = 'Pending payment';
 
+            // Insert order into the database
             $insert_stmt = $conn->prepare('INSERT INTO `order` (order_date, price, status, customer_id, product_id) VALUES(?,?,?,?,?)');
             $insert_stmt->bind_param("sdsii", $order_date, $price, $status, $user_id, $product_id);
 
@@ -99,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $delivery_method = $_POST['delivery_method'];
                 $delivery_status = 'Pending payment';
 
+                // Insert shipment into the database and add delivery method if "Delivery" is selected
                 if ($delivery_method == 'Delivery') {
                     $shipment_stmt = $conn->prepare('INSERT INTO shipment (order_id, address_id, delivery_method, delivery_status) VALUES (?, ?, ?, ?)');
                     $shipment_stmt->bind_param("iiss", $order_id, $address_id, $delivery_method, $delivery_status);
@@ -124,6 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     header("Location: index.php");
                     exit;
                 }
+
+                // Redirect to payment page with details.
 
                 echo '
                         <form id="redirectToPaymentForm" action="../payment/create.php" method="post">
@@ -311,161 +320,160 @@ require_once __DIR__ . '/../../includes/header.php';
             </div>
         </div>
     <?php endif; ?>
-</div>
-
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Notification</strong>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toastMessage"></div>
     </div>
-</div>
 
-<script>
-    // Display toast message if it exists in session
-    <?php if (isset($_SESSION['toast_message'])): ?>
-        document.addEventListener('DOMContentLoaded', function () {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+    <script>
+        // Display toast message if it exists in session
+        <?php if (isset($_SESSION['toast_message'])): ?>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
 
-            // Set message and style
-            toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
-            toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
+                // Set message and style
+                toastMessage.textContent = "<?php echo $_SESSION['toast_message']; ?>";
+                toast.classList.add('text-bg-<?php echo $_SESSION['toast_type'] ?? 'primary'; ?>');
 
-            // Initialize and show toast
-            const bsToast = new bootstrap.Toast(toast, {
-                autohide: true,
-                delay: 3500
+                // Initialize and show toast
+                const bsToast = new bootstrap.Toast(toast, {
+                    autohide: true,
+                    delay: 3500
+                });
+                bsToast.show();
+
+                // Clear session variables
+                <?php
+                unset($_SESSION['toast_message']);
+                unset($_SESSION['toast_type']);
+                ?>
             });
-            bsToast.show();
+        <?php endif; ?>
+    </script>
 
-            // Clear session variables
-            <?php
-            unset($_SESSION['toast_message']);
-            unset($_SESSION['toast_type']);
-            ?>
-        });
-    <?php endif; ?>
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Check if existing_address element exists before adding event listener
-        const existingAddressSelect = document.getElementById('existing_address');
-        if (existingAddressSelect) {
-            existingAddressSelect.addEventListener('change', function () {
-                const opt = this.options[this.selectedIndex];
-                if (!this.value) {
-                    document.getElementById('address_line').value = '';
-                    document.getElementById('city').value = '';
-                    document.getElementById('province').value = '';
-                    document.getElementById('country').value = '';
-                    document.getElementById('postal_code').value = '';
-                    return;
-                }
-
-                document.getElementById('address_line').value = opt.dataset.line;
-                document.getElementById('city').value = opt.dataset.city;
-                document.getElementById('province').value = opt.dataset.province;
-                document.getElementById('country').value = opt.dataset.country;
-                document.getElementById('postal_code').value = opt.dataset.postal;
-            });
-        }
-
-        const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
-        const deliveryAddressDiv = document.getElementById('deliveryAddress');
-        const addressFields = [
-            document.getElementById('address_line'),
-            document.getElementById('city'),
-            document.getElementById('province'),
-            document.getElementById('country'),
-            document.getElementById('postal_code')
-        ];
-
-        function updateFieldsRequired() {
-            const isDelivery = document.querySelector('input[name="delivery_method"]:checked').value === 'Delivery';
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if existing_address element exists before adding event listener
             const existingAddressSelect = document.getElementById('existing_address');
-            const hasExistingAddress = existingAddressSelect && existingAddressSelect.value !== '';
-
-            deliveryAddressDiv.style.display = isDelivery ? 'block' : 'none';
-
-            addressFields.forEach(field => {
-                if (field) {
-                    field.required = isDelivery && !hasExistingAddress;
-                }
-            });
-        }
-
-        updateFieldsRequired();
-
-        deliveryMethodRadios.forEach(radio => {
-            radio.addEventListener('change', updateFieldsRequired);
-        });
-
-        if (existingAddressSelect) {
-            existingAddressSelect.addEventListener('change', updateFieldsRequired);
-        }
-    });
-</script>
-
-<script>
-    // Save form data as user types
-    document.addEventListener('DOMContentLoaded', function () {
-        // Get all form fields we want to save
-        const existingAddressSelect = document.getElementById('existing_address');
-        const address_lineField = document.getElementById('address_line');
-        const cityField = document.getElementById('city');
-        const provinceField = document.getElementById('province');
-        const countryField = document.getElementById('country');
-        const postal_codeField = document.getElementById('postal_code');
-
-
-        // Function to save form data
-        function saveFormData() {
-            const formData = {
-                existing_address: existingAddressSelect ? existingAddressSelect.value : '',
-                address: address_lineField.value,
-                city: cityField.value,
-                province: provinceField.value,
-                country: countryField.value,
-                postal_code: postal_codeField.value
-            };
-
-            localStorage.setItem('addressFormData', JSON.stringify(formData));
-        }
-
-        // Add input event listeners to all fields
-        if (existingAddressSelect) {
-            existingAddressSelect.addEventListener('change', saveFormData);
-        }
-        address_lineField.addEventListener('input', saveFormData);
-        cityField.addEventListener('input', saveFormData);
-        provinceField.addEventListener('input', saveFormData);
-        countryField.addEventListener('input', saveFormData);
-        postal_codeField.addEventListener('input', saveFormData);
-
-        // Load saved form data if it exists
-        const savedData = JSON.parse(localStorage.getItem('addressFormData'));
-        if (savedData) {
             if (existingAddressSelect) {
-                existingAddressSelect.value = savedData.existing_address || '';
+                existingAddressSelect.addEventListener('change', function() {
+                    const opt = this.options[this.selectedIndex];
+                    if (!this.value) {
+                        document.getElementById('address_line').value = '';
+                        document.getElementById('city').value = '';
+                        document.getElementById('province').value = '';
+                        document.getElementById('country').value = '';
+                        document.getElementById('postal_code').value = '';
+                        return;
+                    }
+
+                    document.getElementById('address_line').value = opt.dataset.line;
+                    document.getElementById('city').value = opt.dataset.city;
+                    document.getElementById('province').value = opt.dataset.province;
+                    document.getElementById('country').value = opt.dataset.country;
+                    document.getElementById('postal_code').value = opt.dataset.postal;
+                });
             }
-            address_lineField.value = savedData.address || '';
-            cityField.value = savedData.city || '';
-            provinceField.value = savedData.province || '';
-            countryField.value = savedData.country || '';
-            postal_codeField.value = savedData.postal_code || '';
-        }
 
-        // Clear saved data when form is submitted
-        document.querySelector('form').addEventListener('submit', function () {
-            localStorage.removeItem('addressFormData');
+            const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
+            const deliveryAddressDiv = document.getElementById('deliveryAddress');
+            const addressFields = [
+                document.getElementById('address_line'),
+                document.getElementById('city'),
+                document.getElementById('province'),
+                document.getElementById('country'),
+                document.getElementById('postal_code')
+            ];
+
+            function updateFieldsRequired() {
+                const isDelivery = document.querySelector('input[name="delivery_method"]:checked').value === 'Delivery';
+                const existingAddressSelect = document.getElementById('existing_address');
+                const hasExistingAddress = existingAddressSelect && existingAddressSelect.value !== '';
+
+                deliveryAddressDiv.style.display = isDelivery ? 'block' : 'none';
+
+                addressFields.forEach(field => {
+                    if (field) {
+                        field.required = isDelivery && !hasExistingAddress;
+                    }
+                });
+            }
+
+            updateFieldsRequired();
+
+            deliveryMethodRadios.forEach(radio => {
+                radio.addEventListener('change', updateFieldsRequired);
+            });
+
+            if (existingAddressSelect) {
+                existingAddressSelect.addEventListener('change', updateFieldsRequired);
+            }
         });
-    });
-</script>
+    </script>
 
-<?php
-require_once __DIR__ . '/../../includes/footer.php';
-?>
+    <script>
+        // Save form data as user types
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all form fields we want to save
+            const existingAddressSelect = document.getElementById('existing_address');
+            const address_lineField = document.getElementById('address_line');
+            const cityField = document.getElementById('city');
+            const provinceField = document.getElementById('province');
+            const countryField = document.getElementById('country');
+            const postal_codeField = document.getElementById('postal_code');
+
+
+            // Function to save form data
+            function saveFormData() {
+                const formData = {
+                    existing_address: existingAddressSelect ? existingAddressSelect.value : '',
+                    address: address_lineField.value,
+                    city: cityField.value,
+                    province: provinceField.value,
+                    country: countryField.value,
+                    postal_code: postal_codeField.value
+                };
+
+                localStorage.setItem('addressFormData', JSON.stringify(formData));
+            }
+
+            // Add input event listeners to all fields
+            if (existingAddressSelect) {
+                existingAddressSelect.addEventListener('change', saveFormData);
+            }
+            address_lineField.addEventListener('input', saveFormData);
+            cityField.addEventListener('input', saveFormData);
+            provinceField.addEventListener('input', saveFormData);
+            countryField.addEventListener('input', saveFormData);
+            postal_codeField.addEventListener('input', saveFormData);
+
+            // Load saved form data if it exists
+            const savedData = JSON.parse(localStorage.getItem('addressFormData'));
+            if (savedData) {
+                if (existingAddressSelect) {
+                    existingAddressSelect.value = savedData.existing_address || '';
+                }
+                address_lineField.value = savedData.address || '';
+                cityField.value = savedData.city || '';
+                provinceField.value = savedData.province || '';
+                countryField.value = savedData.country || '';
+                postal_codeField.value = savedData.postal_code || '';
+            }
+
+            // Clear saved data when form is submitted
+            document.querySelector('form').addEventListener('submit', function() {
+                localStorage.removeItem('addressFormData');
+            });
+        });
+    </script>
+
+    <?php
+    require_once __DIR__ . '/../../includes/footer.php';
+    ?>

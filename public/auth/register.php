@@ -69,6 +69,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $stmt->close();
 
+        // Hash the password using a default hash.
+
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $conn->prepare("INSERT INTO user (name, surname, email, password, role) VALUES (?, ?, ?, ?, ?)");
@@ -83,6 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $conn->close();
 
+            // Redirect to the login page
             header("Location: login.php");
             exit;
         } else {
@@ -95,6 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+// Loads form data if available in session.
 if (isset($_SESSION['form_data'])) {
     $name = htmlspecialchars($_SESSION['form_data']['name'] ?? '');
     $surname = htmlspecialchars($_SESSION['form_data']['surname'] ?? '');
@@ -194,6 +198,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </script>
 
 <script>
+    // Ensures the first letter of the input is capitalised.
     document.addEventListener('DOMContentLoaded', function () {
         const capitalizeInputs = document.querySelectorAll('.auto-capitalise');
 

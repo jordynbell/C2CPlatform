@@ -19,6 +19,7 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "View Listings - Squito";
 
+// Fetch all active listings excluding the logged-in user's listings from the database
 $stmt = $conn->prepare('SELECT product_id, title, description, category, price, status, image FROM product WHERE status = "Active" AND seller_id != ?');
 $stmt->bind_param("i", $_SESSION['User_ID']);
 $stmt->execute();

@@ -18,6 +18,7 @@ if (!isset($_SESSION["Email"])) {
 }
 
 if (!isset($_GET['order_id']) && isset($_GET['id'])) {
+    // Check if the product exists in an order with a status of "Pending payment"
     $order_stmt = $conn->prepare('SELECT order_id FROM `order` WHERE product_id = ? AND status = "Pending payment" LIMIT 1');
     $order_stmt->bind_param('i', $_GET['id']);
     $order_stmt->execute();

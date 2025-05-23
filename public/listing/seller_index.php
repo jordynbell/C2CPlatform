@@ -19,6 +19,7 @@ if (!isset($_SESSION["Email"])) {
 
 $pageTitle = "Seller Listings - Squito";
 
+// Fetch seller listings from the database
 $seller_id = $_SESSION["User_ID"];
 $stmt = $conn->prepare('SELECT product_id, title, description, category, price, status, image FROM product WHERE seller_id = ?');
 $stmt->bind_param("i", $seller_id);

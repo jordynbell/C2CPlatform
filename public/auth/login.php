@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../lib/db.php';
 $email = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Initialise variables
     $email = $_POST['email'];
     $password = $_POST['password'];
     $stmt = $conn->prepare("SELECT password, isActive FROM user WHERE email = ?");
@@ -31,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $conn->close();
 
+                // Redirect to the login page
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit;
             }
@@ -41,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $result = $stmt->get_result();
-            $user = $result->fetch_assoc();
+            $user = $result->fetch_assoc();         
             
             $stmt->close();
 
@@ -53,6 +55,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['toast_type'] = "success";
 
             $conn->close();
+
+            // Redirect to the index page on succesful login
 
             header("Location: ../index.php");
             exit;
@@ -90,6 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+// Reloads the email if the form failed to submit, but the email was set.
 if (isset($_SESSION['form_data'])) {
     $email = htmlspecialchars($_SESSION['form_data']['email'] ?? '');
     unset($_SESSION['form_data']);

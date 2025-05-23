@@ -25,13 +25,16 @@ if ($address_id === null) {
     $_SESSION['toast_type'] = "danger";
 
     $conn->close();
-    
+
+    // Redirect to the address list page
     header("Location: index.php");
     exit;
 }
 
 $isActive = 0;
 
+
+// Update the address to set isActive to 0, which infers a soft delete.
 $stmt = $conn->prepare('UPDATE address SET isActive = ? WHERE address_id = ? AND user_id = ?');
 $stmt->bind_param("iii", $isActive, $address_id, $user_id);
 if ($stmt->execute()) {
@@ -43,6 +46,7 @@ if ($stmt->execute()) {
 
     $conn->close();
 
+    // Redirect to the address list page
     header("Location: index.php");
     exit;
 } else {
@@ -53,7 +57,6 @@ if ($stmt->execute()) {
     // Set toast error messages
     $_SESSION['toast_message'] = "Failed to delete address. Please try again.";
     $_SESSION['toast_type'] = "danger";
-    
 }
 
 ?>

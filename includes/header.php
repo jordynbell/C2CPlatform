@@ -4,6 +4,8 @@ if (!isset($_SESSION)) {
 }
 ?>
 
+<!-- Implementation of the header, including css dependencies and the referencing of navigation.php -->
+
 <!DOCTYPE html>
 <html lang="en">
 

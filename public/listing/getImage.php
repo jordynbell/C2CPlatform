@@ -6,6 +6,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $id = (int)$_GET['id'];
     
 
+    // Acquires the image from the database
     $stmt = $conn->prepare("SELECT image FROM product WHERE product_id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();

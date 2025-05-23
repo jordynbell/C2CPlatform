@@ -1,5 +1,5 @@
 <?php
-
+// Initialise database connection parameters
 if (getenv('DB_HOST')) {
     $servername = getenv('DB_HOST');
     $port       = getenv('DB_PORT') ?: 3306;

@@ -18,6 +18,7 @@ if (!isset($_SESSION["Email"])) {
 }
 
 if (!isset($_GET['order_id']) && isset($_GET['id'])) {
+    // Check if the product is in the order table with a status of "Pending payment"
     $order_stmt = $conn->prepare('SELECT order_id FROM `order` WHERE product_id = ? AND status = "Pending payment" LIMIT 1');
     $order_stmt->bind_param('i', $_GET['id']);
     $order_stmt->execute();
@@ -37,6 +38,18 @@ if (!isset($_GET['order_id']) && isset($_GET['id'])) {
 $pageTitle = "View Order Details - Squito";
 $sellerId = null;
 $status = isset($_GET['status']) ? $_GET['status'] : null;
+
+// Check if the product ID is set in the URL
+if (!isset($_GET['id'])) {
+    // Set toast error messages
+    $_SESSION['toast_message'] = "Product ID not provided.";
+    $_SESSION['toast_type'] = "danger";
+
+    $conn->close();
+
+    header("Location: index.php");
+    exit;
+}
 
 $stmt = $conn->prepare('SELECT * FROM product where product_id = ? LIMIT 1');
 $stmt->bind_param('i', $_GET['id']);

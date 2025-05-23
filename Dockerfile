@@ -1,4 +1,6 @@
-FROM php:8.3-apache
+# Created this file to build and run the application in a docker container on the aws ec2 instance
+
+FROM php:8.4-apache
 
 WORKDIR /var/www
 

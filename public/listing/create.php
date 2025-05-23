@@ -20,6 +20,7 @@ if (!isset($_SESSION["Email"])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Initialise variables
     $title = $_POST['title'];
     $description = $_POST['description'];
     $category = $_POST['category'];
@@ -41,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $image = file_get_contents($_FILES['image']['tmp_name']);
 
+        // Creates the listing
         $stmt = $conn->prepare("INSERT INTO product (title, description, price, category, seller_id, status, image) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("ssdsiss", $title, $description, $price, $category, $seller_id, $status, $image);
 
@@ -53,6 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $conn->close();
 
+            // Redirect to the index page on successful listing creation
             header("Location: index.php");
             exit;
         } else {

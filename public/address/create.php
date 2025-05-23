@@ -20,6 +20,7 @@ if (!isset($_SESSION["Email"])) {
 $pageTitle = "Create Address - Squito";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Initialise variables
     $address_line = $_POST["address_line"];
     $city = $_POST["city"];
     $province = $_POST["province"];
@@ -27,6 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $postal_code = $_POST["postal_code"];
     $user_id = $_SESSION["User_ID"];
 
+    // Insert into address table
     $stmt = $conn->prepare("INSERT INTO address (user_id, address_line, city, province, country, postal_code) VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("isssss", $user_id, $address_line, $city, $province, $country, $postal_code);
 
@@ -38,6 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $conn->close();
 
+        // Redirect to the address list page
         header("Location: index.php");
         exit;
     } else {
@@ -48,6 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $conn->close();
 
+        // Redirect back to the create address page
         header("Location: create.php");
         exit;
     }
