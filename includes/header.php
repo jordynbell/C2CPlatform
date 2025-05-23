@@ -12,7 +12,7 @@ $basePath = $isProduction ? '' : '/C2CPlatform/public';
 // Authentication logic
 $current_path = $_SERVER['PHP_SELF'];
 $auth_paths = ['/auth/login.php', '/auth/register.php', '/C2CPlatform/public/auth/login.php', '/C2CPlatform/public/auth/register.php'];
-$public_paths = ['/about.php', '/C2CPlatform/public/about.php', '/index.php', '/C2CPlatform/public/index.php'];
+$public_paths = ['/about.php', '/C2CPlatform/public/about.php', '/index.php', '/C2CPlatform/public/index.php', '/privacy.php', '/C2CPlatform/public/privacy.php'];
 
 $is_public_page = false;
 
