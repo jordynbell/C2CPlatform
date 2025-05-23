@@ -311,7 +311,34 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </section>
+
 <?php endif; ?>
+
+<section>
+    <div class="container mt-5">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-10 col-xl-8 text-center">
+                <h3 class="mb-4">Contact Us</h3>
+                <p class="mb-4">
+                    Have questions or need support? We're here to help!
+                </p>
+                <div class="card p-4 shadow-sm">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                        <h5>Email Us</h5>
+                        <p>For questions, support, or feedback:</p>
+                        <a href="mailto:support@squito.com" class="btn btn-outline-primary">
+                            support@squito.com
+                        </a>
+                    </div>
+                    <div class="text-center">
+                        <p class="mb-0"><small>We typically respond within 24-48 hours</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <div class="toast-container position-fixed top-0 end-0 p-3">
     <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
