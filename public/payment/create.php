@@ -193,15 +193,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header("Location: failed.php?order_id=" . $order_id . "&reason=payment_declined");
             exit;
         }
-    } else {
-        // Set toast error messages
-        $_SESSION['toast_message'] = "Invalid request.";
-        $_SESSION['toast_type'] = "danger";
-
-        $conn->close();
-
-        header("Location: ../order/index.php");
-        exit;
     }
 }
 
