@@ -38,7 +38,6 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <div class="container">
     <h1 class="text-center">Addresses</h1>
-    <h1 class="text-center">All Listings</h1>
     <div class="table-responsive">
         <table class="table table-striped table-hover table-bordered" border="1">
             <tr>

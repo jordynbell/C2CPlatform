@@ -18,6 +18,17 @@ if (!isset($_SESSION["Email"])) {
     exit;
 }
 
+$backUrl = 'index.php'; // Default to listings page
+$backText = 'Back to Listings';
+
+if (isset($_SERVER['HTTP_REFERER'])) {
+    $referer = $_SERVER['HTTP_REFERER'];
+    if (strpos($referer, '/order/') !== false) {
+        $backUrl = '../order/index.php';
+        $backText = 'Back to Orders';
+    }
+}
+
 if (!isset($_GET['order_id']) && isset($_GET['id'])) {
     // Check if the product exists in an order with a status of "Pending payment"
     $order_stmt = $conn->prepare('SELECT order_id FROM `order` WHERE product_id = ? AND status = "Pending payment" LIMIT 1');
@@ -90,7 +101,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <div class="container my-5">
     <div class="row justify-content-center mb-3">
         <div class="col-12 col-lg-10">
-            <a href="index.php" class="btn btn-outline-secondary">Back to Listings</a>
+            <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><?php echo $backText; ?></a>
         </div>
     </div>
     <div class="row justify-content-center">

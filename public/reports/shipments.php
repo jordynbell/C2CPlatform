@@ -73,7 +73,7 @@ require_once __DIR__ . '/../../includes/header.php';
                     <td><?php echo htmlspecialchars($shipment['delivery_method']); ?></td>
                     <td><?php echo htmlspecialchars($shipment['delivery_status']); ?></td>
                     <td><?php echo htmlspecialchars($shipment['order_id']); ?></td>
-                    <td><?php echo htmlspecialchars($shipment['address_id']); ?></td>
+                    <td><?php echo htmlspecialchars($shipment['address_id'] ?? ''); ?></td>
                     <td><?php echo htmlspecialchars($shipment['shipment_date']); ?></td>
                 </tr>
             <?php endforeach; ?>
